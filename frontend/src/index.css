@@ -1,0 +1,31 @@
+﻿/*NO ELIMINAR NADA.*/
+body {
+    background-color: #000000;
+    margin: 0;
+    padding: 0;   
+}
+
+/* ==========================================================
+   BARRA DE DESPLAZAMIENTO GLOBAL (ESTILO FINANZARC)
+   ========================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #161616;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #c8b277;
+  border-radius: 4px;
+  border: 2px solid #161616; 
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #e0ca91; 
+  cursor: pointer;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c8b277 #161616;
+}

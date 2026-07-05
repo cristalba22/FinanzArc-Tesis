@@ -1,0 +1,44 @@
+﻿/* Reset y Configuración Base */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+
+/* Navbar Contenedor (Golden Premium) */
+.navbar-container { width: 100%; background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 85px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+.nav-content { width: 100%; max-width: 1210px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
+.logo-text { font-size: 1.8rem; font-weight: 800; color: #D4AF37; letter-spacing: -0.5px; cursor: pointer; background: linear-gradient(145deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+/* Menú Píldora (Escritorio) */
+.menu-pill { display: flex; background: #141414; padding: 5px; border-radius: 14px; gap: 2px; border: 1px solid rgba(212, 175, 55, 0.15); }
+.nav-link { text-decoration: none !important; color: #a0a0a0; padding: 10px 20px; border-radius: 10px; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 500; font-size: 0.9rem; position: relative; }
+.nav-link:hover { color: #FFD700; background: rgba(212, 175, 55, 0.08); }
+
+/* Botones de Acceso (Escritorio) */
+.login-button { height: 44px; background: linear-gradient(145deg, #D4AF37, #B8860B); color: #000; border: none; border-radius: 10px; padding: 0 25px; cursor: pointer; font-size: .9rem; font-weight: 700; transition: all .3s ease; box-shadow: 0 4px 15px rgba(184, 134, 11, 0.2); }
+.login-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); filter: brightness(1.1); }
+
+/* Icono Hamburguesa (Oro) */
+.hamburger-icon { display: none; flex-direction: column; width: 28px; height: 18px; cursor: pointer; z-index: 1100; position: relative; }
+.hamburger-icon span { display: block; width: 100%; height: 2px; background: #D4AF37; border-radius: 4px; transition: all .3s ease; position: absolute; }
+.hamburger-icon span:nth-child(1) { top: 0; }
+.hamburger-icon span:nth-child(2) { top: 8px; }
+.hamburger-icon span:nth-child(3) { top: 16px; }
+.hamburger-icon.open span:nth-child(1) { top: 8px; transform: rotate(45deg); }
+.hamburger-icon.open span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+.hamburger-icon.open span:nth-child(3) { top: 8px; transform: rotate(-45deg); }
+
+/* Menú Móvil (Animaciones y Botones) */
+.mobile-menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1050; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.mobile-menu-overlay.open { display: flex; opacity: 1; visibility: visible; }
+.mobile-menu-content { display: flex; flex-direction: column; align-items: center; gap: 25px; width: 100%; }
+.mobile-link { color: #fff; font-size: 1.8rem; font-weight: 500; text-decoration: none; letter-spacing: -0.5px; padding: 10px 30px; border-radius: 50px; transition: all 0.3s ease; border: 1px solid transparent; }
+.mobile-link:hover { color: #D4AF37; background: rgba(212, 175, 55, 0.05); border-color: rgba(212, 175, 55, 0.3); transform: scale(1.05); text-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+.mobile-login-button { margin-top: 20px; background: #D4AF37; color: #000; border: none; padding: 16px 60px; border-radius: 50px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; transition: all 0.3s ease; cursor: pointer; }
+.mobile-login-button:hover { background: #FFD700; transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+.mobile-login-button:active { transform: scale(0.95); }
+
+/* Responsive */
+@media (max-width: 810px) {
+    .desktop-menu { display: none !important; }
+    .hamburger-icon { display: flex; }
+    .mobile-menu-overlay { display: flex; }
+    .navbar-container { height: 75px; }
+}

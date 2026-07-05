@@ -1,0 +1,30 @@
+﻿/* ==========================================
+   CARRUSEL MÓVIL Y TARJETAS PROPUESTA
+   ========================================== */
+.contenedor-carrusel-movil { width: 100%; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; }
+
+/* --- INTRO --- */
+.introduccion-carrusel { max-width: 600px; text-align: center; margin-bottom: 50px; }
+.introduccion-carrusel h1 { color: #fff; font-size: 2rem; margin-bottom: 15px; }
+.introduccion-carrusel p { color: #8a8a8a; font-size: .95rem; }
+
+/* --- SWIPER (CORRECCIÓN DE ALTURAS) --- */
+.swiper-propuesta { width: 100%; padding-bottom: 80px; }
+.swiper-wrapper { align-items: stretch !important; /* Obliga a que la pista estire todas las tarjetas por igual */ }
+.swiper-slide { height: auto !important; display: flex; justify-content: center; }
+
+/* --- TARJETA --- */
+.tarjeta-propuesta { margin-top: 30px; width: 100%; max-width: 280px; background: #111; border-radius: 25px; padding: 30px 20px; display: flex; flex-direction: column; align-items: flex-start; height: 100%; /* Flexbox: ocupa 100% del alto */ position: relative; border: 1px solid rgba(197, 160, 95, .2); box-shadow: 0 0 15px rgba(197, 160, 95, .15), inset 0 0 20px rgba(197, 160, 95, .05); transition: all .3s ease; }
+.tarjeta-propuesta:hover { transform: translateY(-6px); box-shadow: 0 0 25px rgba(197, 160, 95, .3), inset 0 0 30px rgba(197, 160, 95, .08); }
+.tarjeta-propuesta::before { content: ""; position: absolute; top: 10px; left: 20px; right: 20px; height: 2px; background: linear-gradient(to right, transparent, rgba(197, 160, 95, .6), transparent); }
+
+/* --- DISEÑO INTERNO (LOGO, TEXTOS, TILDE) --- */
+.logo-container { width: 60px; height: 60px; display: flex; align-items: center; justify-content: flex-start; }
+.logo-img { display: block; object-fit: contain; }
+.tarjeta-propuesta h2 { color: #c5a05f; font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; }
+.tarjeta-propuesta p { color: #9a9a9a; font-size: .9rem; line-height: 1.5; margin-bottom: 20px; flex-grow: 1; /* Empuja el tilde al fondo */ }
+.tilde-texto { color: #c5a05f; font-size: .85rem; width: 100%; border-top: 1px solid rgba(255, 255, 255, .06); padding-top: 15px; margin-top: auto; /* Anclado al fondo */ }
+
+/* --- PAGINACIÓN --- */
+.swiper-pagination-bullet { background: #555; opacity: 1; }
+.swiper-pagination-bullet-active { background: #c5a05f; width: 20px; border-radius: 10px; }

@@ -1,0 +1,613 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="FinanzasDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="AhorroHistorial">
+          <Key>
+            <PropertyRef Name="IdAhorroHistorial" />
+          </Key>
+          <Property Name="IdAhorroHistorial" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdMetaAhorro" Type="int" Nullable="false" />
+          <Property Name="IdCuentaOrigen" Type="int" />
+          <Property Name="MontoAportado" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaAporte" Type="date" Nullable="false" />
+          <Property Name="Nota" Type="nvarchar" MaxLength="500" />
+          <Property Name="FechaCreacion" Type="datetime2" Precision="0" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Categoria">
+          <Key>
+            <PropertyRef Name="IdCategoria" />
+          </Key>
+          <Property Name="IdCategoria" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Divisa">
+          <Key>
+            <PropertyRef Name="IdDivisa" />
+          </Key>
+          <Property Name="IdDivisa" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CodigoISO" Type="char" MaxLength="3" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentoGasto">
+          <Key>
+            <PropertyRef Name="IdDocumentoGasto" />
+          </Key>
+          <Property Name="IdDocumentoGasto" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdGasto" Type="int" Nullable="false" />
+          <Property Name="NombreArchivoOriginal" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="NombreArchivoFisico" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="RutaArchivo" Type="nvarchar" MaxLength="500" />
+          <Property Name="ExtensionArchivo" Type="nvarchar" MaxLength="20" />
+          <Property Name="ContentType" Type="nvarchar" MaxLength="100" />
+          <Property Name="TamanioBytes" Type="bigint" />
+          <Property Name="FechaCarga" Type="datetime2" Precision="0" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+        </EntityType>
+        <EntityType Name="DocumentoIngreso">
+          <Key>
+            <PropertyRef Name="IdDocumentoIngreso" />
+          </Key>
+          <Property Name="IdDocumentoIngreso" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdIngreso" Type="int" Nullable="false" />
+          <Property Name="NombreArchivoOriginal" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="NombreArchivoFisico" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="RutaArchivo" Type="nvarchar" MaxLength="500" />
+          <Property Name="ExtensionArchivo" Type="nvarchar" MaxLength="20" />
+          <Property Name="ContentType" Type="nvarchar" MaxLength="100" />
+          <Property Name="TamanioBytes" Type="bigint" />
+          <Property Name="FechaCarga" Type="datetime2" Precision="0" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+        </EntityType>
+        <EntityType Name="EstadoMetaAhorro">
+          <Key>
+            <PropertyRef Name="IdEstadoMetaAhorro" />
+          </Key>
+          <Property Name="IdEstadoMetaAhorro" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Gasto">
+          <Key>
+            <PropertyRef Name="IdGasto" />
+          </Key>
+          <Property Name="IdGasto" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdCategoria" Type="int" Nullable="false" />
+          <Property Name="IdModoPago" Type="int" Nullable="false" />
+          <Property Name="IdDivisa" Type="int" Nullable="false" />
+          <Property Name="MontoGasto" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Descripcion" Type="nvarchar" MaxLength="500" />
+          <Property Name="FechaGasto" Type="date" Nullable="false" />
+        </EntityType>
+        <EntityType Name="HistorialGasto">
+          <Key>
+            <PropertyRef Name="IdHistorialGasto" />
+          </Key>
+          <Property Name="IdHistorialGasto" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+          <Property Name="Idcategoria" Type="int" />
+          <Property Name="Monto" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="IdDivisa" Type="int" />
+          <Property Name="Fecha" Type="date" />
+          <Property Name="FechaDeGuardado" Type="date" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="HistorialIngreso">
+          <Key>
+            <PropertyRef Name="IdHistorialIngreso" />
+          </Key>
+          <Property Name="IdHistorialIngreso" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+          <Property Name="IdTipoIngreso" Type="int" />
+          <Property Name="Monto" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="IdDivisa" Type="int" />
+          <Property Name="Fecha" Type="date" />
+          <Property Name="FechaDeGuardado" Type="date" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="Ingreso">
+          <Key>
+            <PropertyRef Name="IdIngreso" />
+          </Key>
+          <Property Name="IdIngreso" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdTipoIngreso" Type="int" Nullable="false" />
+          <Property Name="IdDivisa" Type="int" Nullable="false" />
+          <Property Name="MontoIngreso" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaIngreso" Type="datetime" Nullable="false" />
+          <Property Name="Descripcion" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="MetaAhorro">
+          <Key>
+            <PropertyRef Name="IdMetaAhorro" />
+          </Key>
+          <Property Name="IdMetaAhorro" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdDivisa" Type="int" Nullable="false" />
+          <Property Name="IdEstadoMetaAhorro" Type="int" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="MontoObjetivo" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaInicio" Type="date" Nullable="false" />
+          <Property Name="FechaMeta" Type="date" Nullable="false" />
+          <Property Name="FechaCreacion" Type="datetime2" Precision="0" Nullable="false" />
+          <Property Name="MontoGuardado" Type="decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <EntityType Name="ModoPago">
+          <Key>
+            <PropertyRef Name="IdModoPago" />
+          </Key>
+          <Property Name="IdModoPago" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Plan">
+          <Key>
+            <PropertyRef Name="IdPlan" />
+          </Key>
+          <Property Name="IdPlan" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="59" />
+          <Property Name="Precio" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="Detalle" Type="varchar" MaxLength="300" />
+          <Property Name="IdRol" Type="int" />
+          <Property Name="IdTipoSuscripcion" Type="int" />
+        </EntityType>
+        <EntityType Name="TipoIngreso">
+          <Key>
+            <PropertyRef Name="IdTipoIngreso" />
+          </Key>
+          <Property Name="IdTipoIngreso" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <!--Errores durante la generación:
+advertencia 6013: La tabla o vista 'FinanzasDB.dbo.TipoSuscripcion' no tiene definida una clave principal y no es posible inferir ninguna clave principal válida. Esta tabla o vista se ha excluido. Para usar la entidad, necesitará revisar el esquema, agregar las claves correctas y quitar sus comentarios.
+        <EntityType Name="TipoSuscripcion">
+          <Property Name="IdTipoSuscripcion" Type="int" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="50" />
+        </EntityType>-->
+        <EntityType Name="Usuario">
+          <Key>
+            <PropertyRef Name="IdUsuario" />
+          </Key>
+          <Property Name="IdUsuario" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Apellido" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Email" Type="nvarchar" MaxLength="254" Nullable="false" />
+          <Property Name="Telefono" Type="nvarchar" MaxLength="30" />
+          <Property Name="NombreUsuario" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="PasswordHash" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="UrlCarpeta" Type="nvarchar" MaxLength="500" />
+          <Property Name="FechaAlta" Type="datetime2" Precision="0" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+          <Property Name="IdRol" Type="int" />
+        </EntityType>
+        <EntityContainer Name="FinanzasDBModelStoreContainer">
+          <EntitySet Name="AhorroHistorial" EntityType="Self.AhorroHistorial" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Categoria" EntityType="Self.Categoria" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Divisa" EntityType="Self.Divisa" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DocumentoGasto" EntityType="Self.DocumentoGasto" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DocumentoIngreso" EntityType="Self.DocumentoIngreso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EstadoMetaAhorro" EntityType="Self.EstadoMetaAhorro" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Gasto" EntityType="Self.Gasto" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="HistorialGasto" EntityType="Self.HistorialGasto" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="HistorialIngreso" EntityType="Self.HistorialIngreso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Ingreso" EntityType="Self.Ingreso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MetaAhorro" EntityType="Self.MetaAhorro" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ModoPago" EntityType="Self.ModoPago" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Plan" EntityType="Self.Plan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TipoIngreso" EntityType="Self.TipoIngreso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Usuario" EntityType="Self.Usuario" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="FinanzasDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="AhorroHistorial">
+          <Key>
+            <PropertyRef Name="IdAhorroHistorial" />
+          </Key>
+          <Property Name="IdAhorroHistorial" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdMetaAhorro" Type="Int32" Nullable="false" />
+          <Property Name="IdCuentaOrigen" Type="Int32" />
+          <Property Name="MontoAportado" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaAporte" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Nota" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="FechaCreacion" Type="DateTime" Nullable="false" Precision="0" />
+        </EntityType>
+        <EntityType Name="Categoria">
+          <Key>
+            <PropertyRef Name="IdCategoria" />
+          </Key>
+          <Property Name="IdCategoria" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Divisa">
+          <Key>
+            <PropertyRef Name="IdDivisa" />
+          </Key>
+          <Property Name="IdDivisa" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CodigoISO" Type="String" MaxLength="3" FixedLength="true" Unicode="false" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentoGasto">
+          <Key>
+            <PropertyRef Name="IdDocumentoGasto" />
+          </Key>
+          <Property Name="IdDocumentoGasto" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdGasto" Type="Int32" Nullable="false" />
+          <Property Name="NombreArchivoOriginal" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="NombreArchivoFisico" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RutaArchivo" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ExtensionArchivo" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ContentType" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="TamanioBytes" Type="Int64" />
+          <Property Name="FechaCarga" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IdUsuario" Type="Int32" />
+        </EntityType>
+        <EntityType Name="DocumentoIngreso">
+          <Key>
+            <PropertyRef Name="IdDocumentoIngreso" />
+          </Key>
+          <Property Name="IdDocumentoIngreso" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdIngreso" Type="Int32" Nullable="false" />
+          <Property Name="NombreArchivoOriginal" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="NombreArchivoFisico" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RutaArchivo" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ExtensionArchivo" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ContentType" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="TamanioBytes" Type="Int64" />
+          <Property Name="FechaCarga" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IdUsuario" Type="Int32" />
+        </EntityType>
+        <EntityType Name="EstadoMetaAhorro">
+          <Key>
+            <PropertyRef Name="IdEstadoMetaAhorro" />
+          </Key>
+          <Property Name="IdEstadoMetaAhorro" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Gasto">
+          <Key>
+            <PropertyRef Name="IdGasto" />
+          </Key>
+          <Property Name="IdGasto" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdCategoria" Type="Int32" Nullable="false" />
+          <Property Name="IdModoPago" Type="Int32" Nullable="false" />
+          <Property Name="IdDivisa" Type="Int32" Nullable="false" />
+          <Property Name="MontoGasto" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Descripcion" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="FechaGasto" Type="DateTime" Nullable="false" Precision="0" />
+        </EntityType>
+        <EntityType Name="HistorialGasto">
+          <Key>
+            <PropertyRef Name="IdHistorialGasto" />
+          </Key>
+          <Property Name="IdHistorialGasto" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" />
+          <Property Name="Idcategoria" Type="Int32" />
+          <Property Name="Monto" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="IdDivisa" Type="Int32" />
+          <Property Name="Fecha" Type="DateTime" Precision="0" />
+          <Property Name="FechaDeGuardado" Type="DateTime" Precision="0" />
+          <Property Name="Descripcion" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="HistorialIngreso">
+          <Key>
+            <PropertyRef Name="IdHistorialIngreso" />
+          </Key>
+          <Property Name="IdHistorialIngreso" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" />
+          <Property Name="IdTipoIngreso" Type="Int32" />
+          <Property Name="Monto" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="IdDivisa" Type="Int32" />
+          <Property Name="Fecha" Type="DateTime" Precision="0" />
+          <Property Name="FechaDeGuardado" Type="DateTime" Precision="0" />
+          <Property Name="Descripcion" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Ingreso">
+          <Key>
+            <PropertyRef Name="IdIngreso" />
+          </Key>
+          <Property Name="IdIngreso" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdTipoIngreso" Type="Int32" Nullable="false" />
+          <Property Name="IdDivisa" Type="Int32" Nullable="false" />
+          <Property Name="MontoIngreso" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaIngreso" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Descripcion" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="MetaAhorro">
+          <Key>
+            <PropertyRef Name="IdMetaAhorro" />
+          </Key>
+          <Property Name="IdMetaAhorro" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdDivisa" Type="Int32" Nullable="false" />
+          <Property Name="IdEstadoMetaAhorro" Type="Int32" Nullable="false" />
+          <Property Name="Nombre" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MontoObjetivo" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="FechaInicio" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaMeta" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaCreacion" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="MontoGuardado" Type="Decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <EntityType Name="ModoPago">
+          <Key>
+            <PropertyRef Name="IdModoPago" />
+          </Key>
+          <Property Name="IdModoPago" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Plan">
+          <Key>
+            <PropertyRef Name="IdPlan" />
+          </Key>
+          <Property Name="IdPlan" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="59" FixedLength="false" Unicode="false" />
+          <Property Name="Precio" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="Detalle" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="IdRol" Type="Int32" />
+          <Property Name="IdTipoSuscripcion" Type="Int32" />
+        </EntityType>
+        <EntityType Name="TipoIngreso">
+          <Key>
+            <PropertyRef Name="IdTipoIngreso" />
+          </Key>
+          <Property Name="IdTipoIngreso" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Usuario">
+          <Key>
+            <PropertyRef Name="IdUsuario" />
+          </Key>
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Apellido" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="254" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Telefono" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="NombreUsuario" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UrlCarpeta" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="FechaAlta" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+          <Property Name="IdRol" Type="Int32" />
+        </EntityType>
+        <EntityContainer Name="FinanzasDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="AhorroHistorial" EntityType="Self.AhorroHistorial" />
+          <EntitySet Name="Categoria" EntityType="Self.Categoria" />
+          <EntitySet Name="Divisa" EntityType="Self.Divisa" />
+          <EntitySet Name="DocumentoGasto" EntityType="Self.DocumentoGasto" />
+          <EntitySet Name="DocumentoIngreso" EntityType="Self.DocumentoIngreso" />
+          <EntitySet Name="EstadoMetaAhorro" EntityType="Self.EstadoMetaAhorro" />
+          <EntitySet Name="Gasto" EntityType="Self.Gasto" />
+          <EntitySet Name="HistorialGasto" EntityType="Self.HistorialGasto" />
+          <EntitySet Name="HistorialIngreso" EntityType="Self.HistorialIngreso" />
+          <EntitySet Name="Ingreso" EntityType="Self.Ingreso" />
+          <EntitySet Name="MetaAhorro" EntityType="Self.MetaAhorro" />
+          <EntitySet Name="ModoPago" EntityType="Self.ModoPago" />
+          <EntitySet Name="Plan" EntityType="Self.Plan" />
+          <EntitySet Name="TipoIngreso" EntityType="Self.TipoIngreso" />
+          <EntitySet Name="Usuario" EntityType="Self.Usuario" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="FinanzasDBModelStoreContainer" CdmEntityContainer="FinanzasDBEntities">
+          <EntitySetMapping Name="AhorroHistorial">
+            <EntityTypeMapping TypeName="FinanzasDBModel.AhorroHistorial">
+              <MappingFragment StoreEntitySet="AhorroHistorial">
+                <ScalarProperty Name="IdAhorroHistorial" ColumnName="IdAhorroHistorial" />
+                <ScalarProperty Name="IdMetaAhorro" ColumnName="IdMetaAhorro" />
+                <ScalarProperty Name="IdCuentaOrigen" ColumnName="IdCuentaOrigen" />
+                <ScalarProperty Name="MontoAportado" ColumnName="MontoAportado" />
+                <ScalarProperty Name="FechaAporte" ColumnName="FechaAporte" />
+                <ScalarProperty Name="Nota" ColumnName="Nota" />
+                <ScalarProperty Name="FechaCreacion" ColumnName="FechaCreacion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Categoria">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Categoria">
+              <MappingFragment StoreEntitySet="Categoria">
+                <ScalarProperty Name="IdCategoria" ColumnName="IdCategoria" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Divisa">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Divisa">
+              <MappingFragment StoreEntitySet="Divisa">
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="CodigoISO" ColumnName="CodigoISO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentoGasto">
+            <EntityTypeMapping TypeName="FinanzasDBModel.DocumentoGasto">
+              <MappingFragment StoreEntitySet="DocumentoGasto">
+                <ScalarProperty Name="IdDocumentoGasto" ColumnName="IdDocumentoGasto" />
+                <ScalarProperty Name="IdGasto" ColumnName="IdGasto" />
+                <ScalarProperty Name="NombreArchivoOriginal" ColumnName="NombreArchivoOriginal" />
+                <ScalarProperty Name="NombreArchivoFisico" ColumnName="NombreArchivoFisico" />
+                <ScalarProperty Name="RutaArchivo" ColumnName="RutaArchivo" />
+                <ScalarProperty Name="ExtensionArchivo" ColumnName="ExtensionArchivo" />
+                <ScalarProperty Name="ContentType" ColumnName="ContentType" />
+                <ScalarProperty Name="TamanioBytes" ColumnName="TamanioBytes" />
+                <ScalarProperty Name="FechaCarga" ColumnName="FechaCarga" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentoIngreso">
+            <EntityTypeMapping TypeName="FinanzasDBModel.DocumentoIngreso">
+              <MappingFragment StoreEntitySet="DocumentoIngreso">
+                <ScalarProperty Name="IdDocumentoIngreso" ColumnName="IdDocumentoIngreso" />
+                <ScalarProperty Name="IdIngreso" ColumnName="IdIngreso" />
+                <ScalarProperty Name="NombreArchivoOriginal" ColumnName="NombreArchivoOriginal" />
+                <ScalarProperty Name="NombreArchivoFisico" ColumnName="NombreArchivoFisico" />
+                <ScalarProperty Name="RutaArchivo" ColumnName="RutaArchivo" />
+                <ScalarProperty Name="ExtensionArchivo" ColumnName="ExtensionArchivo" />
+                <ScalarProperty Name="ContentType" ColumnName="ContentType" />
+                <ScalarProperty Name="TamanioBytes" ColumnName="TamanioBytes" />
+                <ScalarProperty Name="FechaCarga" ColumnName="FechaCarga" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EstadoMetaAhorro">
+            <EntityTypeMapping TypeName="FinanzasDBModel.EstadoMetaAhorro">
+              <MappingFragment StoreEntitySet="EstadoMetaAhorro">
+                <ScalarProperty Name="IdEstadoMetaAhorro" ColumnName="IdEstadoMetaAhorro" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Gasto">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Gasto">
+              <MappingFragment StoreEntitySet="Gasto">
+                <ScalarProperty Name="IdGasto" ColumnName="IdGasto" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdCategoria" ColumnName="IdCategoria" />
+                <ScalarProperty Name="IdModoPago" ColumnName="IdModoPago" />
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="MontoGasto" ColumnName="MontoGasto" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="FechaGasto" ColumnName="FechaGasto" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="HistorialGasto">
+            <EntityTypeMapping TypeName="FinanzasDBModel.HistorialGasto">
+              <MappingFragment StoreEntitySet="HistorialGasto">
+                <ScalarProperty Name="IdHistorialGasto" ColumnName="IdHistorialGasto" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Idcategoria" ColumnName="Idcategoria" />
+                <ScalarProperty Name="Monto" ColumnName="Monto" />
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="FechaDeGuardado" ColumnName="FechaDeGuardado" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="HistorialIngreso">
+            <EntityTypeMapping TypeName="FinanzasDBModel.HistorialIngreso">
+              <MappingFragment StoreEntitySet="HistorialIngreso">
+                <ScalarProperty Name="IdHistorialIngreso" ColumnName="IdHistorialIngreso" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdTipoIngreso" ColumnName="IdTipoIngreso" />
+                <ScalarProperty Name="Monto" ColumnName="Monto" />
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="FechaDeGuardado" ColumnName="FechaDeGuardado" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Ingreso">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Ingreso">
+              <MappingFragment StoreEntitySet="Ingreso">
+                <ScalarProperty Name="IdIngreso" ColumnName="IdIngreso" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdTipoIngreso" ColumnName="IdTipoIngreso" />
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="MontoIngreso" ColumnName="MontoIngreso" />
+                <ScalarProperty Name="FechaIngreso" ColumnName="FechaIngreso" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MetaAhorro">
+            <EntityTypeMapping TypeName="FinanzasDBModel.MetaAhorro">
+              <MappingFragment StoreEntitySet="MetaAhorro">
+                <ScalarProperty Name="IdMetaAhorro" ColumnName="IdMetaAhorro" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdDivisa" ColumnName="IdDivisa" />
+                <ScalarProperty Name="IdEstadoMetaAhorro" ColumnName="IdEstadoMetaAhorro" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="MontoObjetivo" ColumnName="MontoObjetivo" />
+                <ScalarProperty Name="FechaInicio" ColumnName="FechaInicio" />
+                <ScalarProperty Name="FechaMeta" ColumnName="FechaMeta" />
+                <ScalarProperty Name="FechaCreacion" ColumnName="FechaCreacion" />
+                <ScalarProperty Name="MontoGuardado" ColumnName="MontoGuardado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ModoPago">
+            <EntityTypeMapping TypeName="FinanzasDBModel.ModoPago">
+              <MappingFragment StoreEntitySet="ModoPago">
+                <ScalarProperty Name="IdModoPago" ColumnName="IdModoPago" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Plan">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Plan">
+              <MappingFragment StoreEntitySet="Plan">
+                <ScalarProperty Name="IdPlan" ColumnName="IdPlan" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Precio" ColumnName="Precio" />
+                <ScalarProperty Name="Detalle" ColumnName="Detalle" />
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="IdTipoSuscripcion" ColumnName="IdTipoSuscripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TipoIngreso">
+            <EntityTypeMapping TypeName="FinanzasDBModel.TipoIngreso">
+              <MappingFragment StoreEntitySet="TipoIngreso">
+                <ScalarProperty Name="IdTipoIngreso" ColumnName="IdTipoIngreso" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Usuario">
+            <EntityTypeMapping TypeName="FinanzasDBModel.Usuario">
+              <MappingFragment StoreEntitySet="Usuario">
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Apellido" ColumnName="Apellido" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Telefono" ColumnName="Telefono" />
+                <ScalarProperty Name="NombreUsuario" ColumnName="NombreUsuario" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="UrlCarpeta" ColumnName="UrlCarpeta" />
+                <ScalarProperty Name="FechaAlta" ColumnName="FechaAlta" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

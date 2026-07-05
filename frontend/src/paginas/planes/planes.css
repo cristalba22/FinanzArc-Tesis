@@ -1,0 +1,218 @@
+﻿/* planes.css */
+.planes-encabezado {
+    color: #c8b277;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+.contenedor-planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1100px;
+    align-items: stretch;
+    
+}
+.planes-introduccion {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+.planes-encabezado {
+    text-align: center !important;
+}
+
+/* ESTILOS PARA LA LISTA DE DETALLES DE PLANES*/
+.lista-detalles {
+  list-style-type: none;
+  padding: 10px 15px;
+  margin: 15px 0 25px 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  box-shadow: inset 0px 2px 0 #c8b277; 
+}
+.boton-secundario-plan {
+      text-decoration: none; background: transparent; border: 1px solid #D4AF37; color: #D4AF37; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: .85rem; font-weight: 500; transition: all .3s ease; text-transform: uppercase; letter-spacing: .5px;
+}
+.boton-secundario-plan:hover { background: #D4AF37;
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, .1);}
+.selector-suscripcion{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+
+    
+}
+.lista-detalles li {
+  display: flex;
+  align-items: flex-start;
+  font-size: 18px;
+  line-height: 1.6;
+  word-break: break-word;
+  
+  /* Separación y líneas simulando renglones */
+  padding: 8px 0 8px 10px; 
+  font-family: inherit; 
+}
+.lista-detalles li:last-child {
+  border-bottom: none;
+}
+.detalle-incluido {
+  color: #27672a;
+  font-weight: 600;
+}
+.detalle-excluido {
+  color: #c62828; /* Rojo sobrio (simulando tinta roja) */
+  opacity: 0.85;
+  /* Tachado sutil para dar la sensación de un ítem descartado en los apuntes */
+  text-decoration: line-through; 
+  text-decoration-color: rgba(198, 40, 40, 0.4);
+}
+.detalle-normal {
+    font-size: 35px;
+  color: rgba(255, 255, 255, 0.555); /* Gris azulado muy oscuro, similar a la tinta de lapicera */
+  font-weight: 500;
+    text-align: center;
+}
+.detalle-vacio {
+  font-style: italic;
+  color: #78909c;
+  font-size: 14px;
+  margin: 15px 0;
+  text-align: center;
+  padding: 12px;
+  /* Estilo de nota en blanco */
+  border: 1px dashed #cfd8dc;
+  border-radius: 4px;
+  background-color: #f5f7f8;
+}
+.tarjeta-plan {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 30px;
+    background: rgba(25, 25, 26, 0.65);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(200, 178, 119, 0.2);
+    border-radius: 16px;
+    text-align: center;
+    
+    /* Sombra base: Casi invisible, integrada al fondo oscuro */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+                
+    /* TRANSICIÓN: Clásica y lineal pero suave */
+    transition: all 0.35s ease-in-out;
+}
+.tarjeta-plan:hover {
+    /* Animación: Solo sube */
+    transform: translateY(-12px);
+    
+    /* Sombra Hover: Se proyecta hacia abajo imitando luz desde arriba */
+    box-shadow: 0 30px 50px rgba(0, 0, 0, 0.9),
+                0 15px 20px rgba(200, 178, 119, 0.1);
+}
+.tarjeta-plan h3 {
+    color: #ffffff;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+.tarjeta-plan h2 {
+    color: #c8b277;
+    font-size: 2.2rem;
+    margin: 25px 0;
+}
+.tarjeta-plan p {
+    color: #b0b0b1;
+    line-height: 1.6;
+    margin-bottom: 35px;
+    font-size: 1.05rem;
+}
+
+/* BOTONES */
+.btn-plan {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-plan:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.btn-plan-suscribir {
+    background: #c8b277;
+    color: #1e1e1f;
+    border: none;
+}
+.btn-plan-suscribir:hover:not(:disabled) {
+    background: #d4c08b;
+}
+.btn-plan-editar {
+    background: transparent;
+    color: #c8b277;
+    border: 1px solid #c8b277;
+}
+.btn-plan-editar:hover {
+    background: rgba(200, 178, 119, 0.1);
+}
+.planes-boton {
+    width: 300px;
+}
+
+/* Textarea del Modal */
+.textarea-modal {
+    background: #1e1e1f;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px;
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+}
+.textarea-modal:focus {
+    outline: none;
+    border-color: #c8b277;
+}
+.detalle-destacado {
+  color: #c8b277; 
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 15px; 
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 1024px) {
+    .contenedor-planes-grid{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+    .tarjeta-plan {
+        width: 60%;
+        /* max-width: 400px; */
+    }
+}
+@media (max-width: 810px) {
+    .planes-boton {
+        width: 350px;
+    }
+}
+@media (max-width: 585px) {
+    .planes-boton {
+        width: 250px;
+    }
+}

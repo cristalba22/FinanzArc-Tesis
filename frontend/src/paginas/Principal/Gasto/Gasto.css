@@ -1,0 +1,465 @@
+﻿/* CONTENEDOR PRINCIPAL */
+.pagina-gasto-contenedor {
+    width: 100%;
+    max-width: 1210px;
+    margin: 0 auto;
+    padding: 100px 20px 60px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    font-family: inherit;
+    animation: fadeIn .6s ease-in-out;
+    overflow-x: hidden;
+}
+.pagina-gasto-contenedor .titulo-seccion {
+    font-size: clamp(1.8rem, 4vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: left;
+    margin-bottom: 30px;
+}
+.pagina-gasto-contenedor .subtitulo-seccion {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #FF4B4B;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* GRÁFICO + TABLA TOP CATEGORÍAS */
+.pagina-gasto-tarjeta {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    margin-bottom: 40px;
+    align-items: stretch;
+}
+.pagina-gasto-contenedor .tarjeta,
+.pagina-gasto-contenedor .contenedor-tabla-filtradaCategoria,
+.pagina-gasto-contenedor .contenedor-tabla {
+    background: #1e1e1f;
+    border-radius: 20px;
+    padding: clamp(20px, 3vw, 30px);
+    /* CAMBIO: Borde rojo sutil */
+    border: 1px solid rgba(255, 75, 75, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+    width: 100%;
+    box-sizing: border-box;
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+.pagina-gasto-contenedor .tarjeta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* CAMBIO: Hover con borde rojo */
+.pagina-gasto-contenedor .tarjeta:hover,
+.pagina-gasto-contenedor .contenedor-tabla-filtradaCategoria:hover,
+.pagina-gasto-contenedor .contenedor-tabla:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 75, 75, 0.4);
+    box-shadow: 0 15px 40px rgba(255, 75, 75, 0.1);
+}
+.pagina-gasto-contenedor .contenedor-tabla {
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+/* BUSCADOR CON AZUL VIBRANTE */
+.pagina-gasto-contenedor .buscador-gasto-categoria {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    width: 100%;
+    gap: 15px;
+}
+.pagina-gasto-contenedor .buscador-gasto-categoria .subtitulo-seccion {
+    margin-bottom: 0;
+}
+.pagina-gasto-contenedor .grupo-input-buscar {
+    display: flex;
+    gap: 10px;
+}
+.pagina-gasto-contenedor .input-buscar {
+    background: #2a2a2b;
+    border: 1px solid rgba(255, 255, 255, .1);
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: .95rem;
+    outline: none;
+    transition: all .3s ease;
+    width: 250px;
+    box-sizing: border-box;
+}
+.pagina-gasto-contenedor .input-buscar:focus {
+    border-color: #FF4B4B;
+    box-shadow: 0 0 10px rgba(255, 75, 75, 0.2);
+}
+.pagina-gasto-contenedor .boton-buscar {
+    background: #FF4B4B;
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all .3s ease;
+}
+.pagina-gasto-contenedor .boton-buscar:hover {
+    background: #CC3333;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 75, 75, 0.4);
+}
+/* TABLAS RESPONSIVAS */
+.pagina-gasto-contenedor .tabla-responsive {
+    width: 100%;
+    max-height: 480px;
+    /* Define el alto máximo antes de activar el scroll (aprox 10-12 filas) */
+    overflow-y: auto;
+    /* Activa la barra vertical */
+    display: block;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 75, 75, 0.1);
+}
+.tabla-responsive .tabla-ingresos .td-fecha {
+    text-align: center;
+}
+
+/* Fija el encabezado para que no se pierda al hacer scroll */
+.pagina-gasto-contenedor .tabla-gasto thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #1e1e1f;
+    /* Asegúrate que sea el mismo color de fondo que la tabla */
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+.pagina-gasto-contenedor .tabla-gasto {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    background: transparent;
+}
+.pagina-gasto-contenedor .tabla-gasto th {
+    background: #2a2a2b;
+    color: #FF4B4B;
+    text-align: left;
+    padding: 15px;
+    font-weight: 600;
+    font-size: .9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.pagina-gasto-contenedor .tabla-gasto td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, .05);
+    color: #fff;
+    font-size: .95rem;
+    white-space: nowrap;
+}
+.pagina-gasto-contenedor .tabla-gasto tbody tr:hover {
+    background: rgba(255, 75, 75, 0.05);
+}
+.pagina-gasto-contenedor .tabla-gasto tbody tr:last-child td {
+    border-bottom: none;
+}
+.pagina-gasto-contenedor .texto-gris {
+    color: #888;
+}
+.pagina-gasto-contenedor .monto-destacado {
+    font-weight: bold;
+    color: #FF4B4B;
+}
+
+/* BOTONES */
+.pagina-gasto-contenedor .boton-primario {
+    background: #FF4B4B;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px 50px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all .3s ease;
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+.pagina-gasto-contenedor .boton-primario:hover {
+    background: #CC3333;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 75, 75, 0.4);
+}
+.pagina-gasto-contenedor .boton-secundario {
+    background: transparent;
+    color: #fff;
+    font-weight: 500;
+    padding: 15px 30px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    cursor: pointer;
+    transition: all .3s ease;
+}
+.pagina-gasto-contenedor .boton-secundario:hover {
+    background: rgba(255, 255, 255, .1);
+    border-color: #fff;
+}
+
+/* MODAL (PREMIUM ROJO) */
+.pagina-gasto-contenedor .capa-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .75);
+    backdrop-filter: blur(12px) saturate(150%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    box-sizing: border-box;
+    animation: fadeInModal .3s ease-out forwards;
+}
+.pagina-gasto-contenedor .contenido-modal {
+    background: linear-gradient(145deg, #222224, #1a1a1b);
+    padding: 40px;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 75, 75, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .8), 0 0 30px rgba(255, 75, 75, 0.05), inset 0 1px 1px rgba(255, 255, 255, .05);
+    box-sizing: border-box;
+    animation: slideUpModal .4s cubic-bezier(.16, 1, .3, 1) forwards;
+}
+.pagina-gasto-contenedor .contenido-modal h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: .5px;
+    position: relative;
+    padding-bottom: 15px;
+}
+.pagina-gasto-contenedor .contenido-modal h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #FF4B4B, transparent);
+    border-radius: 2px;
+}
+.pagina-gasto-contenedor .formulario-grupo {
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+}
+.pagina-gasto-contenedor .formulario-grupo label {
+    color: #FF4B4B;
+    margin-bottom: 8px;
+    font-size: .9rem;
+    font-weight: 500;
+    letter-spacing: .5px;
+}
+.pagina-gasto-contenedor .formulario-grupo input,
+.pagina-gasto-contenedor .formulario-grupo select {
+    width: 100%;
+    box-sizing: border-box;
+    background: #161616;
+    border: 1px solid rgba(255, 255, 255, .08);
+    color: #fff;
+    padding: 14px 15px;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all .3s ease;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3);
+}
+.pagina-gasto-contenedor .formulario-grupo input:focus,
+.pagina-gasto-contenedor .formulario-grupo select:focus {
+    border-color: #FF4B4B;
+    box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.15), inset 0 2px 4px rgba(0, 0, 0, .3);
+    background: #1a1a1b;
+}
+.pagina-gasto-contenedor .formulario-acciones {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    gap: 15px;
+}
+.pagina-gasto-contenedor .formulario-acciones button {
+    flex: 1;
+    margin-bottom: 0;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all .3s cubic-bezier(.25, .8, .25, 1);
+}
+.pagina-gasto-contenedor .formulario-acciones .boton-primario {
+    background: linear-gradient(135deg, #FF4B4B 0%, #CC3333 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 15px rgba(255, 75, 75, 0.25), inset 0 1px 1px rgba(255, 255, 255, .4);
+}
+.pagina-gasto-contenedor .formulario-acciones .boton-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 75, 75, 0.4), inset 0 1px 1px rgba(255, 255, 255, .5);
+    background: linear-gradient(135deg, #FF6666 0%, #FF4B4B 100%);
+}
+.pagina-gasto-contenedor .formulario-acciones .boton-secundario {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(255, 255, 255, .1);
+    color: #aaa;
+}
+.pagina-gasto-contenedor .formulario-acciones .boton-secundario:hover {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .3);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Contenedor padre de la tabla: Aseguramos que sea un Flex vertical */
+.contenedor-tabla-filtradaCategoria {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    background: #1e1e1f;
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(255, 75, 75, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+}
+/* El contenedor responsive */
+.pagina-gasto-contenedor .tabla-responsive {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+/* Barra de scroll personalizada */
+.pagina-gasto-contenedor .tabla-responsive::-webkit-scrollbar {
+    width: 6px;
+}
+.pagina-gasto-contenedor .tabla-responsive::-webkit-scrollbar-track {
+    background: #161616;
+}
+.pagina-gasto-contenedor .tabla-responsive::-webkit-scrollbar-thumb {
+    background-color: #FF4B4B;
+    border-radius: 10px;
+    border: 1px solid #161616;
+}
+.pagina-gasto-contenedor .tabla-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: #CC3333;
+
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 1050px) {
+    .pagina-gasto-tarjeta {
+        display: flex;
+        flex-direction: column;
+    }
+}
+@media (max-width: 810px) {
+    .pagina-gasto-contenedor {
+        padding-top: 100px;
+    }
+
+    .pagina-gasto-tarjeta {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .pagina-gasto-contenedor .buscador-gasto-categoria {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pagina-gasto-contenedor .grupo-input-buscar {
+        width: 100%;
+    }
+
+    .pagina-gasto-contenedor .input-buscar {
+        flex: 1;
+    }
+}
+@media (max-width: 480px) {
+    .pagina-gasto-contenedor .boton-primario {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .pagina-gasto-contenedor .formulario-acciones {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .pagina-gasto-contenedor .formulario-acciones button {
+        width: 100%;
+    }
+}
+
+/* ANIMACIONES */
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+@keyframes slideUpModal {
+    from {
+        transform: translateY(30px) scale(.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*CLASE PARA CUANDO LOS NUMEROS SEAN GRANDES -> NO SE ROMPA EL CONTENEDOR Y SE ESCONDA.*/
+.truncate-text {
+    max-width: 200px;
+    /* Ajusta este valor según cuánto espacio quieras darle */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    /* Necesario para que funcione dentro de la celda */
+}
