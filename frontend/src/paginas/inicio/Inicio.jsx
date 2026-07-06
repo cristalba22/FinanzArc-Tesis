@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import "./Inicio.css";
 import CarrouselPropuesta from "../../componentes/Carrousel/carrouselPropuesta-";
 
@@ -11,7 +11,7 @@ const Inicio = () => {
         <div className="containerInicio" id="inicio">
           <div className="contenedorBackground">
             <img
-              src="/Imagenes/Gemini_Generated_Image_ebcj9lebcj9lebcj.webp"
+              src="/Imagenes/FondoDeInicio.JPEG"
               alt="Hero"
             />
           </div>
@@ -51,7 +51,7 @@ const Inicio = () => {
             </div>
           </div>
           <div className="containerPropuestaDerecha">
-            <img src="/Imagenes/ImagenSobrePatrimonio.webp" alt="" />
+            <img src="/Imagenes/ImagenSobrePatrimonio.jpeg" alt="" />
           </div>
         </div>
 
@@ -66,4 +66,3 @@ const Inicio = () => {
 };
 
 export default Inicio;
-

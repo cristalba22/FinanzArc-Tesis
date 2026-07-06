@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import "./Footer.css";
 import { Link } from "react-router-dom";
 import emailjs from '@emailjs/browser';
@@ -14,10 +14,10 @@ const Footer = () => {
   });
 
   const equipo = [
-    { nombre: "Agustin", rol: "Full Stack Developer", link: "https://www.linkedin.com/in/agustin-garcia-2a7478328/", texturaFondo: "/Imagenes/agustin.webp" },
-    { nombre: "Ramiro", rol: "Frontend Developer", link: "https://www.linkedin.com/in/ramiro-avila-475648348/", texturaFondo: "/Imagenes/ramiro.webp" },
-    { nombre: "Cristian", rol: "Backend Developer", link: "https://www.linkedin.com/in/", texturaFondo: "/Imagenes/cristian.webp" },
-    { nombre: "Mateo", rol: "UI/UX Designer", link: "https://www.linkedin.com/in/", texturaFondo: "/Imagenes/mateo.webp" },
+    { nombre: "Agustin", rol: "Software Developer", link: "https://www.linkedin.com/in/agustin-garcia-2a7478328/", texturaFondo: "/Imagenes/agustin.webp" },
+    { nombre: "Ramiro", rol: "Backend Developer", link: "https://www.linkedin.com/in/ramiro-avila-475648348/", texturaFondo: "/Imagenes/ramiro.webp" },
+    { nombre: "Cristian", rol: "Release Manager & QA", link: "https://www.linkedin.com/in/cristian-eduardo-alba-374098240/", texturaFondo: "/Imagenes/cristian.webp" },
+    { nombre: "Mateo", rol: "Project Coordinator", link: "https://www.linkedin.com/in/mateo-cardenas/", texturaFondo: "/Imagenes/mateo.webp" },
   ];
 
   const handleChange = (e) => {
@@ -82,19 +82,15 @@ const Footer = () => {
           <div className="footer-col-links">
             <h4>Contáctanos</h4>
             <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-
-              {/* WhatsApp */}
               <a
-                href="https://wa.me/543516184200?text=Hola,%20vengo%20de%20la%20web"
+                href="https://wa.me/543516184200?text=Hola,%20me%20gustaría%20obtener%20más%20información%20sobre%20FinanzARC"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-link-interactivo"
                 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
               >
-                <FaWhatsapp size={18} /> +54 3516 184 200
+                <FaWhatsapp size={18} /> Contactar vía WhatsApp
               </a>
-
-              {/* Email (Botón) */}
               <button
                 className="footer-link-interactivo"
                 onClick={() => setModalContactoAbierto(true)}
@@ -103,12 +99,10 @@ const Footer = () => {
                   textAlign: 'left', padding: 0, display: 'flex', alignItems: 'center', gap: '10px'
                 }}
               >
-                <FaEnvelope size={18} /> Contactar vía email
+                <FaEnvelope size={18} /> Contactar vía Email
               </button>
-
-              {/* Descarga */}
               <a
-                href="/presentacion.pdf"
+                href="/ServiciosFinanzARC.pdf"
                 download="Presentacion_FinanzARC.pdf"
                 className="footer-link-interactivo"
                 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
@@ -124,8 +118,6 @@ const Footer = () => {
           <p>&copy; {new Date().getFullYear()} FinanzARC. Todos los derechos reservados.</p>
         </div>
       </footer>
-
-      {/* MODAL DE CONTACTO */}
       {modalContactoAbierto && (
         <div className="capa-modal" onClick={() => { setModalContactoAbierto(false); setErrorEnvio(false); }}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -152,7 +144,6 @@ const Footer = () => {
                 </button>
               </div>
             ) : (
-              // FORMULARIO NORMAL
               <>
                 <h3>Envíanos un mensaje</h3>
                 <form onSubmit={enviarEmail} className="formulario-cuerpo">
@@ -169,8 +160,6 @@ const Footer = () => {
                       placeholder="Tu nombre (máx 25 car.)"
                     />
                   </div>
-
-                  {/* Campo Email */}
                   <div className="formulario-grupo">
                     <label>Email</label>
                     <input
@@ -182,8 +171,6 @@ const Footer = () => {
                       placeholder="tu@email.com"
                     />
                   </div>
-
-                  {/* Campo Mensaje */}
                   <div className="formulario-grupo">
                     <label>Mensaje</label>
                     <textarea
@@ -195,8 +182,6 @@ const Footer = () => {
                       rows="4"
                     />
                   </div>
-
-                  {/* Botones */}
                   <div className="formulario-acciones">
                     <button
                       type="button"

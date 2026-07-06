@@ -1,4 +1,4 @@
-﻿/* VARIABLES GLOBALES */
+/* VARIABLES GLOBALES */
 :root {
     --carbon-black: #080808;
     --steel-grey: #161618;
@@ -683,4 +683,3 @@
   text-overflow: ellipsis;
   display: block; /* Necesario para que funcione dentro de la celda */
 }
-

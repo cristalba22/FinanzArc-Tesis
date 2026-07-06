@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PhoneInputPkg from "react-phone-input-2";
@@ -10,8 +10,6 @@ import "react-phone-input-2/lib/style.css";
 import "./CrearCuenta.css";
 
 import InicioSesion from "../inicio/InicioSesion/InicioSesion";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const CrearCuenta = () => {
   const [formData, setFormData] = useState({
@@ -129,7 +127,7 @@ const CrearCuenta = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/Usuarios`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "/api"}/Usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(usuarioParaRegistrar)
@@ -143,8 +141,6 @@ const CrearCuenta = () => {
         localStorage.setItem("Apellido", formData.apellido);
         localStorage.setItem("Usuario", data.NombreUsuario);
         localStorage.setItem("PlanActual", "Plan Esencial");
-        localStorage.setItem("IdRol", "1");
-        window.dispatchEvent(new Event("finanzarc-auth"));
 
         toast.success(`¡Bienvenido a FinanzARC, ${formData.nombre}!`, {
           autoClose: 3000,
@@ -158,17 +154,8 @@ const CrearCuenta = () => {
 
       } else {
         const errorText = await response.text();
-        let mensajeError = "Hubo un problema al registrar el usuario.";
-
-        try {
-          const errorData = JSON.parse(errorText);
-          mensajeError = errorData.message || errorData.Message || mensajeError;
-        } catch {
-          if (errorText) mensajeError = errorText;
-        }
-
-        console.error("Error del servidor:", mensajeError);
-        toast.error(mensajeError);
+        console.error("Error del servidor:", errorText);
+        toast.error("Hubo un problema al registrar el usuario.");
       }
     } catch (error) {
       console.error("Error de red:", error);
@@ -197,17 +184,17 @@ const CrearCuenta = () => {
           <div className="form-row">
             <div className="input-box">
               <label>Nombre</label>
-              <input type="text" name="nombre" placeholder="Agustin" onChange={handleChange} required />
+              <input type="text" name="nombre" placeholder="Ej: Juan" onChange={handleChange} required />
             </div>
             <div className="input-box">
               <label>Apellido</label>
-              <input type="text" name="apellido" placeholder="Garcia" onChange={handleChange} required />
+              <input type="text" name="apellido" placeholder="Ej: Pérez" onChange={handleChange} required />
             </div>
           </div>
 
           <div className="input-box">
             <label>Correo Electrónico</label>
-            <input type="email" name="email" placeholder="nombre@ejemplo.com" onChange={handleChange} required />
+            <input type="email" name="email" placeholder="Ej: nombre@ejemplo.com" onChange={handleChange} required />
           </div>
 
           <div className="input-box">
@@ -217,6 +204,7 @@ const CrearCuenta = () => {
               onlyCountries={["ar"]}
               value={formData.telefono}
               onChange={handlePhoneChange}
+              countryCodeEditable={false} /* PARA EVITAR ELIMINAR LOS DOS PRIMEROS DIGITOS */
               inputProps={{ name: "telefono", required: true }}
               containerClass="phone-container-custom"
               inputClass="phone-input-custom"
@@ -227,7 +215,7 @@ const CrearCuenta = () => {
 
           <div className="input-box">
             <label>Nombre de Usuario</label>
-            <input type="text" name="nombreUsuario" placeholder="agusting_dev" onChange={handleChange} required />
+            <input type="text" name="nombreUsuario" placeholder="Ej: JuanPerez123" onChange={handleChange} required />
           </div>
 
           <div className="form-row">
@@ -317,4 +305,3 @@ const CrearCuenta = () => {
 };
 
 export default CrearCuenta;
-

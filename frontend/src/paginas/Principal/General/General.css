@@ -1,4 +1,4 @@
-﻿/* ESTILOS PÁGINA GENERAL (DASHBOARD) 
+/* ESTILOS PÁGINA GENERAL (DASHBOARD) 
 ESTO ES LO MAS IMPORTANTE YA QUE MARCA HASTA DONDE TIENE EL ANCHO 
 TODO EL CUERPO DE LA PAGINA (1210px)
 */
@@ -516,6 +516,12 @@ TODO EL CUERPO DE LA PAGINA (1210px)
         flex-direction: column;
         width: 100%;
     }
+    .introduccion-carrusel h1{
+        font-size: 1.2rem;
+    }
+    .introduccion-carrusel p{
+        font-size: 0.8rem;
+    }
 }
 @media (max-width: 420px) {
     .texto-monto-general .spanValorMeta {
@@ -592,4 +598,3 @@ TODO EL CUERPO DE LA PAGINA (1210px)
     text-overflow: ellipsis;
     display: block;
 }
-

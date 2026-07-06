@@ -1,27 +1,18 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-
-// Importaciones de react-datepicker
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
-
 import "./Ingreso.css";
 import { obtenerTasas } from "../../../apiConfig";
-
-// 1. REGISTRAMOS EL IDIOMA PARA EL DATEPICKER (Soluciona advertencias o que quede en inglés)
 registerLocale("es", es);
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-
-// 2. FUNCIÓN DE FORMATEO MEJORADA
 const formatMontoParaInput = (val) => {
   if (val === "" || val === null || val === undefined) return "";
   const stringVal = val.toString();
   const parts = stringVal.split(".");
-  // Agregamos puntos para separar miles
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  // Retornamos con coma si hay decimales, o si el usuario acaba de tipear una coma
   return parts.length > 1
     ? parts[0] + "," + parts[1]
     : (stringVal.endsWith(".") ? parts[0] + "," : parts[0]);
@@ -38,12 +29,11 @@ function Ingreso() {
   const [tipoIngreso, setTipoIngreso] = useState([]);
   const [divisa, setDivisa] = useState([]);
 
-  // 3. ESTADO INICIAL UNIFICADO
   const [form, setForm] = useState({
     IdIngreso: null,
     IdUsuario: null,
-    IdTipoIngreso: 1, // Inicializado en 1
-    IdDivisa: 1,      // Inicializado en 1
+    IdTipoIngreso: 1,
+    IdDivisa: 1,   
     MontoIngreso: "",
     FechaIngreso: new Date(),
     Descripcion: ""
@@ -157,19 +147,29 @@ function Ingreso() {
     const tasaUSD = tasas?.USD || 1450;
     const tasaEUR = tasas?.EUR || 1650;
 
-    if (idDivisa === 2) return monto * tasaUSD;
-    if (idDivisa === 3) return monto * tasaEUR;
-    return monto;
+    let total = monto;
+    if (idDivisa === 2) total = monto * tasaUSD;
+    if (idDivisa === 3) total = monto * tasaEUR; 
+    if (idDivisa === 2 || idDivisa === 3) {
+      return Math.ceil(total * 10) / 10;
+    }
+
+    return total;
   };
 
   const FormatearMoneda = (monto, idDivisa) => {
     const totalPesos = calcularMontoEnPesos(monto, idDivisa);
+    
     if (idDivisa === 1) return `$${monto.toLocaleString('es-AR')}`;
+    
     const simbolo = idDivisa === 2 ? "USD" : "EUR";
+    
     return (
       <div style={{ display: "flex", flexDirection: "column" }}>
         <span>{simbolo} {monto.toLocaleString('es-AR')}</span>
-        <span style={{ fontSize: "10px", color: "#888" }}>≈ ${totalPesos.toLocaleString('es-AR')} ARS</span>
+        <span style={{ fontSize: "10px", color: "#888" }}>
+          ≈ ${totalPesos.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ARS
+        </span>
       </div>
     );
   };
@@ -184,7 +184,7 @@ function Ingreso() {
     const data = ingresosFiltrados.map(i => ({
       nombre: i.Descripcion,
       valor: calcularMontoEnPesos(Number(i.MontoIngreso), i.IdDivisa)
-    })).slice(0, 5);
+    }))
     return data.length > 0 ? data : [{ nombre: "Sin datos", valor: 0 }];
   }, [ingresosFiltrados, tasas]);
 
@@ -224,7 +224,11 @@ function Ingreso() {
         <p className="texto-gris">
           Administre todos sus ingresos en este apartado. El mismo es de carácter histórico y acumulado; para más detalles de sus ingresos, clickee en los íconos del apartado "ACCIONES".
           <br></br>
-          <strong>Cotizaciones: 1 USD = ${tasas?.USD || "..."} | 1 EUR = ${tasas?.EUR || "..."}</strong>
+          <strong>
+            Cotizaciones: 
+            1 USD = ${ (Math.ceil((tasas?.USD || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) } | 
+            1 EUR = ${ (Math.ceil((tasas?.EUR || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }
+          </strong>
         </p>
       </div>
 
@@ -311,7 +315,6 @@ function Ingreso() {
                   </tr>
                 ) : (
                   ingresosFiltrados.map((item, index) => (
-                    /* 4. KEY CORREGIDA: evitamos usar Math.random() para no perder rendimiento */
                     <tr key={item.IdIngreso || `temp-${index}`}>
                       <td>
                         <div className="truncate-text" title={item.Descripcion}>
@@ -402,14 +405,11 @@ function Ingreso() {
                   placeholder='"850.000..."'
                   onChange={(e) => {
                     const val = e.target.value;
-
-                    // 5. VALIDACIÓN CORREGIDA: quitamos puntos (miles) y convertimos coma en punto para validar
                     const rawVal = val.replace(/\./g, "").replace(",", ".");
                     const numVal = parseFloat(rawVal);
                     const MAX_VALOR = 1000000000;
                     const regex = /^\d*\.?\d{0,2}$/;
 
-                    // Validamos contra el valor puro (rawVal)
                     if (rawVal === "" || (regex.test(rawVal) && (isNaN(numVal) || numVal <= MAX_VALOR))) {
                       setForm({ ...form, MontoIngreso: rawVal });
                     }
@@ -467,4 +467,3 @@ function Ingreso() {
 }
 
 export default Ingreso;
-

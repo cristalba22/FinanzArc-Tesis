@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Agregamos useLocation
 import "../NavBar/Navbar.css";
 import InicioSesion from "../../paginas/inicio/InicioSesion/InicioSesion";
@@ -71,29 +71,31 @@ const Navbar = () => {
   return (
     <header className="navbar-container">
       <nav className="nav-content">
+
         <div className="logo-section">
           <p className="logo-text" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
             FinanzARC
           </p>
         </div>
+
         <div className="menu-pill desktop-menu">
           {isLoggedIn ? (
             <>
               <Link to="/principal" className="nav-link">Principal</Link>
               <Link to="/ingreso" className="nav-link">Ingreso</Link>
               <Link to="/gasto" className="nav-link">Gasto</Link>
-              {idRol === 4 && <Link to="/admin" className="nav-link">Admin</Link>}
-              <Link to="/perfil" className="nav-link">Perfil</Link>
+              <Link to="/perfil" className="nav-link">Mi Perfil</Link>
+              {idRol === 4 && (<Link style={{color: "#D4AF37", textShadow: "0px 0px 8px #D4AF37"}}to="/admin"className="nav-link">Admin</Link>)}
             </>
           ) : (
             <>
               <Link to="/#inicio" className="nav-link">Inicio</Link>
-              <Link to="/#servicio" className="nav-link">Servicios</Link>
-              <Link to="/#propuesta" className="nav-link">Propuesta</Link>
+              <Link to="/#carrousel" className="nav-link">Servicios</Link>
               <Link to="/#contacto" className="nav-link">Contactanos</Link>
             </>
           )}
         </div>
+
         <div className="auth-section desktop-menu">
           <div className="">
             {isLoggedIn ? (
@@ -107,6 +109,7 @@ const Navbar = () => {
             )}
           </div>
         </div>
+
         <div
           className={`hamburger-icon ${isMobileMenuOpen ? "open" : ""}`}
           onClick={toggleMobileMenu}
@@ -115,33 +118,54 @@ const Navbar = () => {
           <span></span>
           <span></span>
         </div>
-        <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
-          <div className="mobile-menu-content">
-            {isLoggedIn ? (
-              <>
-                <Link to="/principal" className="mobile-link" onClick={closeMobileMenu}>Principal</Link>
-                <Link to="/ingreso" className="mobile-link" onClick={closeMobileMenu}>Ingresos</Link>
-                <Link to="/gasto" className="mobile-link" onClick={closeMobileMenu}>Gastos</Link>
-                {idRol === 4 && <Link to="/admin" className="mobile-link" onClick={closeMobileMenu}>Admin</Link>}
-                <Link to="/perfil" className="mobile-link" onClick={closeMobileMenu}>Mi Perfil</Link>
-                <button onClick={handleLogout} className="mobile-login-button logout-variant">
-                  Cerrar Sesión
-                </button>
-              </>
-            ) : (
-              <>
 
-                <Link to="/#inicio" className="mobile-link" onClick={closeMobileMenu}>Inicio</Link>
-                <Link to="/#servicio" className="mobile-link" onClick={closeMobileMenu}>Servicios</Link>
-                <Link to="/#carrousel" className="mobile-link" onClick={closeMobileMenu}>Propuesta</Link>
-                <Link to="/#contacto" className="mobile-link" onClick={closeMobileMenu}>Contactanos</Link>
-                <button onClick={handleLoginClick} className="mobile-login-button">
-                  Ingreso
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+        <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
+  <div className="mobile-menu-content">
+    {isLoggedIn ? (
+      <>
+        <Link to="/principal" className="mobile-link" onClick={closeMobileMenu}>Principal</Link>
+        <Link to="/ingreso" className="mobile-link" onClick={closeMobileMenu}>Ingresos</Link>
+        <Link to="/gasto" className="mobile-link" onClick={closeMobileMenu}>Gastos</Link>
+        <Link to="/perfil" className="mobile-link" onClick={closeMobileMenu}>Mi Perfil</Link>
+        {idRol === 4 && (
+          <Link 
+            style={{color: "#D4AF37", textShadow: "0px 0px 8px #D4AF37", fontSize: "1.6rem"}} 
+            to="/admin" 
+            className="mobile-link" 
+            onClick={closeMobileMenu}
+          >
+            Admin
+          </Link>
+        )}
+        <button 
+          onClick={() => {
+            handleLogout();
+            closeMobileMenu();
+          }} 
+          className="mobile-login-button logout-variant"
+        >
+          Cerrar Sesión
+        </button>
+      </>
+    ) : (
+      <>
+        <Link to="/#inicio" className="mobile-link" onClick={closeMobileMenu}>Inicio</Link>
+        <Link to="/#carrousel" className="mobile-link" onClick={closeMobileMenu}>Servicios</Link>
+        <Link to="/#contacto" className="mobile-link" onClick={closeMobileMenu}>Contactanos</Link>
+        <button 
+          onClick={() => {
+            handleLoginClick();
+            closeMobileMenu();
+          }} 
+          className="mobile-login-button"
+        >
+          Ingreso
+        </button>
+      </>
+    )}
+  </div>
+</div>
+
       </nav>
 
       <InicioSesion

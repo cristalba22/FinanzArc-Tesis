@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Perfil.css';
 
@@ -7,7 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Perfil() {
     const navigate = useNavigate();
-    const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL || "";
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+    const SERVER_HOST = import.meta.env.VITE_SERVER_BASE_URL || "";
 
     const [userData, setUserData] = useState({});
     const [fotoPerfil, setFotoPerfil] = useState(null);
@@ -33,7 +34,7 @@ function Perfil() {
 
         if (!token) return;
 
-        fetch(`${API_BASE_URL}/api/Usuarios/ByToken`, {
+        fetch(`${API_BASE_URL}/Usuarios/ByToken`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -67,7 +68,7 @@ function Perfil() {
 
         if (!token) return;
 
-        fetch(`${API_BASE_URL}/api/FotoPerfil/MiFoto`, {
+        fetch(`${API_BASE_URL}/FotoPerfil/MiFoto`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -77,7 +78,7 @@ function Perfil() {
             .then((data) => {
                 if (data && data.ruta) {
                     setFotoPerfil(
-                        `${API_BASE_URL}${data.ruta}?v=${new Date().getTime()}`
+                        `${SERVER_HOST}${data.ruta}?v=${new Date().getTime()}`
                     );
                 }
             })
@@ -166,7 +167,7 @@ function Perfil() {
 
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/FotoPerfil/Upload`,
+                `${API_BASE_URL}/FotoPerfil/Upload`,
                 {
                     method: "POST",
                     headers: {
@@ -180,7 +181,7 @@ function Perfil() {
 
             if (response.ok && data.success) {
                 setFotoPerfil(
-                    `${API_BASE_URL}${data.ruta}?v=${new Date().getTime()}`
+                    `${SERVER_HOST}${data.ruta}?v=${new Date().getTime()}`
                 );
 
                 toast.success(
@@ -380,4 +381,3 @@ function Perfil() {
 }
 
 export default Perfil;
-

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../General/General.css";
@@ -13,7 +13,7 @@ const Archivos = () => {
   const [documentosGasto, setDocumentosGasto] = useState([]);
   const [usuario, setUsuario] = useState(null);
 
-  // Estados de transacciones para búsqueda (lookup)
+  // Estados de historiales para búsqueda (lookup)
   const [historialIngresos, setHistorialIngresos] = useState([]);
   const [historialGastos, setHistorialGastos] = useState([]);
 
@@ -42,7 +42,7 @@ const Archivos = () => {
     if (!usuario || !usuario.IdUsuario) return;
     setCargandoTransacciones(true);
     const token = localStorage.getItem("Token");
-    const endpoint = tipo === "ingreso" ? "Ingreso" : "Gasto";
+    const endpoint = tipo === "ingreso" ? "HistorialIngreso" : "HistorialGasto";
     try {
       const response = await fetch(`${API_BASE_URL}/${endpoint}/ByUsuario/${usuario.IdUsuario}`, {
         headers: { "Authorization": `Bearer ${token}` }
@@ -63,7 +63,7 @@ const Archivos = () => {
     if (modalAbierto) {
       cargarTransacciones(tipoSubida);
     }
-  }, [modalAbierto, tipoSubida, usuario]);
+  }, [modalAbierto, tipoSubida]);
 
   const filtrarDocumentos = (lista) => {
     return lista.filter((doc) => {
@@ -117,23 +117,23 @@ const Archivos = () => {
         return;
       }
 
-      const [resIngresos, resGastos, resTransIng, resTransGas] = await Promise.all([
+      const [resIngresos, resGastos, resHistIng, resHistGas] = await Promise.all([
         fetch(`${API_BASE_URL}/DocumentoIngreso/Listar`, { headers: { "Authorization": `Bearer ${token}` } }),
         fetch(`${API_BASE_URL}/DocumentoGasto/Listar`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`${API_BASE_URL}/Ingreso/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`${API_BASE_URL}/Gasto/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } })
+        fetch(`${API_BASE_URL}/HistorialIngreso/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/HistorialGasto/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } })
       ]);
 
       if (!resIngresos.ok || !resGastos.ok) throw new Error("Error al recuperar los catálogos documentales.");
 
-      const [dataIngresos, dataGastos, dataTransIng, dataTransGas] = await Promise.all([
-        resIngresos.json(), resGastos.json(), resTransIng.json(), resTransGas.json()
+      const [dataIngresos, dataGastos, dataHistIng, dataHistGas] = await Promise.all([
+        resIngresos.json(), resGastos.json(), resHistIng.json(), resHistGas.json()
       ]);
 
       setDocumentosIngreso(dataIngresos);
       setDocumentosGasto(dataGastos);
-      setHistorialIngresos(dataTransIng);
-      setHistorialGastos(dataTransGas);
+      setHistorialIngresos(dataHistIng);
+      setHistorialGastos(dataHistGas);
 
     } catch (err) {
       console.error("Error:", err);
@@ -246,7 +246,7 @@ const Archivos = () => {
           <p style={{ color: '#888', marginBottom: '25px', lineHeight: '1.6' }}>Para acceder a este apartado, necesitas mejorar tu suscripción actual.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <Link to="/planes" className="botonesComparativa btn-principal" onClick={() => toast.info("Redirigiendo a planes...")}>Mejorar mi Plan🚀</Link>
-            <Link to="/principal" className="botonesComparativa btn-volver" style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}>Volver al Inicio</Link>
+            <Link to="/Principal" className="botonesComparativa btn-volver" style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}>Volver al Inicio</Link>
           </div>
         </div>
       </div>
@@ -313,7 +313,7 @@ const Archivos = () => {
                     <div className="detalles-archivo-item">
                       <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
                       <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdIngreso ? (historialIngresos.find(h => h.IdIngreso === doc.IdIngreso)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
+                      <p><strong>Ref:</strong> {doc.IdIngreso ? (historialIngresos.find(h => h.IdHistorialIngreso === doc.IdIngreso)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
                     </div>
                     <div className="acciones-archivo-item">
                       <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
@@ -359,7 +359,7 @@ const Archivos = () => {
                     <div className="detalles-archivo-item">
                       <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
                       <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdGasto ? (historialGastos.find(h => h.IdGasto === doc.IdGasto)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
+                      <p><strong>Ref:</strong> {doc.IdGasto ? (historialGastos.find(h => h.IdHistorialGasto === doc.IdGasto)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
                     </div>
                     <div className="acciones-archivo-item">
                       <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
@@ -400,23 +400,11 @@ const Archivos = () => {
               <div className="formulario-grupo">
                 <label>Seleccionar Transacción</label>
                 <select value={idTransaccion} onChange={(e) => setIdTransaccion(e.target.value)} required>
-                  <option value="">
-                    {cargandoTransacciones
-                      ? "Cargando transacciones..."
-                      : "-- Seleccione --"}
-                  </option>
+                  <option value="">-- Seleccione --</option>
                   {(tipoSubida === "ingreso" ? historialIngresos : historialGastos).map((item) => {
-                    const id = tipoSubida === "ingreso" ? item.IdIngreso : item.IdGasto;
-                    const monto = tipoSubida === "ingreso" ? item.MontoIngreso : item.MontoGasto;
-                    const fecha = tipoSubida === "ingreso" ? item.FechaIngreso : item.FechaGasto;
-                    const fechaTexto = fecha ? new Date(fecha).toLocaleDateString("es-AR") : "Sin fecha";
-                    return <option key={id} value={id}>{item.Descripcion || "Sin descripción"} - ${monto} - {fechaTexto}</option>;
+                    const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;
+                    return <option key={id} value={id}>{item.Descripcion} - ${item.Monto}</option>;
                   })}
-                  {!cargandoTransacciones && (tipoSubida === "ingreso" ? historialIngresos : historialGastos).length === 0 && (
-                    <option value="" disabled>
-                      No hay {tipoSubida === "ingreso" ? "ingresos" : "gastos"} actuales para asociar
-                    </option>
-                  )}
                 </select>
               </div>
               <div className="formulario-grupo">
@@ -425,9 +413,7 @@ const Archivos = () => {
               </div>
               <div className="formulario-acciones">
                 <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-                <button type="submit" className="boton-primario" disabled={subiendo || !idTransaccion}>
-                  {subiendo ? "Subiendo..." : "Subir"}
-                </button>
+                <button type="submit" className="boton-primario">Subir</button>
               </div>
             </form>
 
@@ -439,4 +425,3 @@ const Archivos = () => {
 };
 
 export default Archivos;
-

@@ -1,4 +1,4 @@
-﻿/* --- Animaciones Keyframes --- */
+/* --- Animaciones Keyframes --- */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes goldGlow { 0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.2); } 50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); } 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.2); } }
 @keyframes borderRotate { 100% { filter: hue-rotate(360deg); } }

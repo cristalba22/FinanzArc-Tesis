@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 import "./Gasto.css";
@@ -97,24 +97,41 @@ function Gasto() {
   };
 
   const calcularMontoEnPesos = (monto, idDivisa) => {
-    // CORRECCIÓN: Uso de Optional Chaining y valores por defecto para seguridad
-    if (idDivisa === 2) return monto * (tasas?.USD || 1450);
-    if (idDivisa === 3) return monto * (tasas?.EUR || 1650);
-    return monto;
+    const tasaUSD = tasas?.USD || 1450;
+    const tasaEUR = tasas?.EUR || 1650;
+
+    let total = monto;
+    if (idDivisa === 2) total = monto * tasaUSD;
+    if (idDivisa === 3) total = monto * tasaEUR; 
+    
+    // Si la divisa es USD (2) o EUR (3), cortamos a 1 decimal redondeando hacia arriba
+    if (idDivisa === 2 || idDivisa === 3) {
+      return Math.ceil(total * 10) / 10;
+    }
+
+    return total;
   };
 
   const FormatearMoneda = (monto, idDivisa) => {
     const totalPesos = calcularMontoEnPesos(monto, idDivisa);
-    if (idDivisa === 1) return `$${monto.toLocaleString()}`;
+    
+    // Agregamos 'es-AR' para asegurar el formato correcto de puntos y comas
+    if (idDivisa === 1) return `$${monto.toLocaleString('es-AR')}`;
+    
     const simbolo = idDivisa === 2 ? "USD" : "EUR";
+    
     return (
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <span>{simbolo} {monto.toLocaleString()}</span>
-        <span style={{ fontSize: "10px", color: "#888" }}>≈ ${totalPesos.toLocaleString()} ARS</span>
+        <span>{simbolo} {monto.toLocaleString('es-AR')}</span>
+        {/* Forzamos la visualización de 1 decimal exacto */}
+        <span style={{ fontSize: "10px", color: "#888" }}>
+          ≈ ${totalPesos.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ARS
+        </span>
       </div>
     );
   };
-  // 2. FUNCIÓN DE FORMATEO MEJORADA
+
+
   const formatMontoParaInput = (val) => {
     if (val === "" || val === null || val === undefined) return "";
     const stringVal = val.toString();
@@ -136,10 +153,18 @@ function Gasto() {
 
   return (
     <div className="pagina-ingreso-contenedor">
+
       <div className="encabezado-simple">
         <h1 className="titulo-seccion">Control de Gastos</h1>
-        <p className="texto-gris"> Administre todos sus gastos en este apartado. El mismo es de carácter histórico y acumulado; para más detalles de sus gastos, clickee en los íconos del apartado "ACCIONES".
-          <strong><br /> Cotizaciones: 1 USD = ${tasas?.USD || 0} | 1 EUR = ${tasas?.EUR || 0}</strong> </p>
+        <p className="texto-gris"> 
+          Administre todos sus gastos en este apartado. El mismo es de carácter histórico y acumulado; para más detalles de sus gastos, clickee en los íconos del apartado "ACCIONES".
+          <strong>
+            <br /> 
+            Cotizaciones: 
+            1 USD = ${ (Math.ceil((tasas?.USD || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) } | 
+            1 EUR = ${ (Math.ceil((tasas?.EUR || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }
+          </strong> 
+        </p>
       </div>
 
       <div className="pagina-ingreso-tarjeta">
@@ -401,4 +426,3 @@ function Gasto() {
 }
 
 export default Gasto;
-

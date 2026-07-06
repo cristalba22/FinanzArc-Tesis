@@ -1,4 +1,4 @@
-﻿/* planes.css */
+/* planes.css */
 .planes-encabezado {
     color: #c8b277;
     font-size: 2.8rem;
@@ -214,5 +214,38 @@
 @media (max-width: 585px) {
     .planes-boton {
         width: 250px;
+    }
+    .tarjeta-plan{
+        width: 80%;
+    }
+}
+@media (max-width: 468px) {
+    .planes-boton {
+        width: 250px;
+    }
+    .tarjeta-plan{
+        width: 100%;
+    }
+    .titulo-principal-general{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .seccion-encabezado-general h2{
+        font-size: 1.5rem;
+    }
+    .titulo-principal-general p {
+        font-size: 0.8rem!important;
+    }
+    .boton-secundario-plan{
+        width: 150px!important;
+        font-size: 0.75rem!important;
+    }
+    .selector-suscripcion{
+        gap: 10px;
+        margin-top: -35px;
+        margin-bottom: -35px;
     }
 }

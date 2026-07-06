@@ -1,8 +1,6 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate correctamente
 import "./InicioSesion.css";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const InicioSesion = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -24,7 +22,7 @@ const InicioSesion = ({ isOpen, onClose }) => {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/Usuarios/Login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "/api"}/Usuarios/Login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ NombreUsuario, PasswordHash }),
@@ -44,16 +42,15 @@ const InicioSesion = ({ isOpen, onClose }) => {
       localStorage.setItem("Nombre", data.Nombre);
       localStorage.setItem("Apellido", data.Apellido);
       localStorage.setItem("PlanActual", data.PlanActual);
-      localStorage.setItem("IdRol", data.IdRol); // <--- Guardamos esto
-      window.dispatchEvent(new Event("finanzarc-auth"));
-      
+      localStorage.setItem("IdRol", data.IdRol); 
+
       // Limpiar estados
       setNombreUsuario("");
       setPasswordHash("");
       onClose();
 
-      // Navegación limpia
-      navigate("/principal");
+      navigate("/Principal");
+      window.location.reload();
 
     } catch (err) {
       setError(err.message);
@@ -95,19 +92,22 @@ const InicioSesion = ({ isOpen, onClose }) => {
                   placeholder="••••••••"
                   required
                 />
-                <button
-                  type="button"
-                  className="btn-ver-password"
-                  onClick={() => setMostrarPasswordHash(!mostrarPasswordHash)}
-                  tabIndex="-1"
-                >
-                  {mostrarPasswordHash ? "Ocultar" : "Ver"}
-                </button>
+
+                
+                  <button
+                    type="button"
+                    className="btn-ver-password"
+                    onClick={() => setMostrarPasswordHash(!mostrarPasswordHash)}
+                    tabIndex="-1"
+                  >
+                    {mostrarPasswordHash ? "Ocultar contraseña" : "Ver contraseña"}
+                  </button>
+               
               </div>
             </div>
 
             <Link to="/crear-cuenta" className="gold-link" onClick={onClose}>
-              ¿No tienes cuenta todavía?
+              ¿No tienes cuenta? Crea una aquí
             </Link>
 
             <button
@@ -125,4 +125,3 @@ const InicioSesion = ({ isOpen, onClose }) => {
 };
 
 export default InicioSesion;
-

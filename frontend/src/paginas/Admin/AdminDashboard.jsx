@@ -12,9 +12,12 @@ import {
 } from "recharts";
 import { toast } from "react-toastify";
 import "./AdminDashboard.css";
+import { useNavigate } from "react-router-dom";
+// Asumo que tu componente SinPermisos lo manejas desde las rutas, 
+// o si lo renderizas condicionalmente podés usarlo más abajo.
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-const COLORS = ["#c8b277", "#9f8a51", "#6fbf8f", "#6d8fd6", "#b16f6f"];
+const COLORS = ["#76643c", "#c8b277", "#eadeaa", "#ffffff"];
 
 const formatoARS = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -25,7 +28,7 @@ const formatoARS = new Intl.NumberFormat("es-AR", {
 const formatoNumero = new Intl.NumberFormat("es-AR");
 
 const filtrosIniciales = {
-  anio: "",
+  año: "",
   mes: "",
   idUsuario: "",
   idRol: "",
@@ -57,18 +60,53 @@ const obtenerFechaInput = (fecha) => {
 };
 
 const AdminDashboard = () => {
+  const navigate = useNavigate(); // Hook instanciado en la raíz
+
+  const [verificado, setVerificado] = useState(false); // Nuevo estado para validar rol real
+  const [verificandoPermisos, setVerificandoPermisos] = useState(true);
+
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [filtros, setFiltros] = useState({
     ...filtrosIniciales,
-    anio: String(new Date().getFullYear())
+    año: String(new Date().getFullYear())
   });
   const [movimientoEditando, setMovimientoEditando] = useState(null);
 
-  const esAdmin = Number(localStorage.getItem("IdRol")) === 4;
+  // 1. Verificación contra el Backend (C# API)
+  useEffect(() => {
+    const verificarAcceso = async () => {
 
+      const token = localStorage.getItem("Token");
+      if (!token) { setCargando(false); return; }
+      try {
+        const res = await fetch(`${API_BASE_URL}/Usuarios/ByToken`, { headers: { "Authorization": `Bearer ${token}` } });
+        if (res.ok) {
+
+          const user = await res.json();
+          const rolUsuario = user.IdRol || user.idRol;
+
+          // Permitimos acceso general a Roles 2 (Gold), 3 (Platinum) y 4 (Dev)
+          if (user.IdRol === 4) {
+            setVerificado(true);
+            setCargando(false);
+          } else {
+            navigate("/sin-permisos");
+          }
+        } else {
+
+          setCargando(false);
+        }
+      } catch (error) { console.error(error); setCargando(false); }
+    };
+    verificarAcceso();
+  }, [navigate]);
+
+
+
+  // 2. Construcción de Query Params
   const construirQuery = useCallback(() => {
     const params = new URLSearchParams();
     Object.entries(filtros).forEach(([key, value]) => {
@@ -79,12 +117,8 @@ const AdminDashboard = () => {
     return params.toString();
   }, [filtros]);
 
+  // 3. Carga del Dashboard (Sólo si ya está verificado)
   const cargarDashboard = useCallback(async () => {
-    if (!esAdmin) {
-      setCargando(false);
-      return;
-    }
-
     setCargando(true);
     setError("");
 
@@ -110,12 +144,16 @@ const AdminDashboard = () => {
     } finally {
       setCargando(false);
     }
-  }, [construirQuery, esAdmin]);
+  }, [construirQuery]);
 
+  // Ejecutar carga de dashboard sólo cuando cambie a verificado = true o cambien los filtros manuales
   useEffect(() => {
-    cargarDashboard();
-  }, [cargarDashboard]);
+    if (verificado) {
+      cargarDashboard();
+    }
+  }, [verificado, cargarDashboard]);
 
+  // Resto de las funciones operativas
   const ejecutarAccion = async (url, opciones, mensajeOk) => {
     setGuardando(true);
     try {
@@ -203,41 +241,8 @@ const AdminDashboard = () => {
   const usuariosFiltro = datos?.ActividadPorUsuario || [];
   const planesDisponibles = datos?.PlanesDisponibles || [];
 
-  if (!esAdmin) {
-    return (
-      <main className="admin-dashboard">
-        <section className="admin-hero">
-          <span className="admin-kicker">Panel administrador</span>
-          <h1>Acceso restringido</h1>
-          <p>Esta vista esta disponible solamente para cuentas administradoras.</p>
-        </section>
-      </main>
-    );
-  }
+  // PANTALLAS DE CARGA Y ERROR TEMPRANAS
 
-  if (cargando && !datos) {
-    return (
-      <main className="admin-dashboard">
-        <section className="admin-hero">
-          <span className="admin-kicker">Panel administrador</span>
-          <h1>Cargando indicadores</h1>
-          <p>Preparando metricas de usuarios, suscripciones y actividad.</p>
-        </section>
-      </main>
-    );
-  }
-
-  if (error && !datos) {
-    return (
-      <main className="admin-dashboard">
-        <section className="admin-hero">
-          <span className="admin-kicker">Panel administrador</span>
-          <h1>No se pudo cargar el dashboard</h1>
-          <p>{error}</p>
-        </section>
-      </main>
-    );
-  }
 
   const rentabilidadReferencia = datos?.MrrEstimado > 0
     ? Math.min(100, (Number(datos.MrrEstimado) / 100000) * 100)
@@ -245,11 +250,18 @@ const AdminDashboard = () => {
 
   return (
     <main className="admin-dashboard">
+
+
+
       <section className="admin-hero">
-        <span className="admin-kicker">Panel administrador</span>
+        <span className="admin-kicker">Panel Developer / Administrador</span>
         <div>
-          <h1>Control de suscripciones</h1>
-          <p>Vista gerencial y operativa para analizar, filtrar y administrar FinanzARC.</p>
+          <h1>Control de Suscripciones</h1>
+          <p>
+            Gestiona usuarios, suscripciones y movimientos en tiempo real. Este panel refleja
+            exclusivamente los registros activos; los datos archivados se trasladan
+            automáticamente al Historial.
+          </p>
         </div>
       </section>
 
@@ -279,11 +291,11 @@ const AdminDashboard = () => {
           </label>
 
           <label>
-            Anio
+            Año
             <input
               type="number"
-              value={filtros.anio}
-              onChange={(e) => setFiltros({ ...filtros, anio: e.target.value })}
+              value={filtros.año}
+              onChange={(e) => setFiltros({ ...filtros, año: e.target.value })}
               min="2020"
               max="2100"
             />
@@ -308,7 +320,7 @@ const AdminDashboard = () => {
               {planesDisponibles.map((plan) => (
                 <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
               ))}
-              <option value="4">Administrador</option>
+              <option value="4">Developer</option>
             </select>
           </label>
 
@@ -331,8 +343,7 @@ const AdminDashboard = () => {
           </label>
 
           <div className="admin-filter-actions">
-            <button className="admin-btn primary" onClick={cargarDashboard} disabled={cargando}>Aplicar</button>
-            <button className="admin-btn ghost" onClick={() => setFiltros({ ...filtrosIniciales, anio: String(new Date().getFullYear()) })}>Limpiar</button>
+            <button className="admin-btn ghost" onClick={() => setFiltros({ ...filtrosIniciales, año: String(new Date().getFullYear()) })}>Limpiar</button>
           </div>
         </div>
       </section>
@@ -448,6 +459,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </article>
+
       </section>
 
       <section className="admin-panel admin-table-panel">
@@ -479,14 +491,14 @@ const AdminDashboard = () => {
                   <td>
                     <select
                       className="admin-inline-select"
-                      value={planesDisponibles.find((p) => p.Nombre === usuario.Plan)?.IdRol || (usuario.Plan === "Administrador" ? 4 : "")}
+                      value={planesDisponibles.find((p) => p.Nombre === usuario.Plan)?.IdRol || (usuario.Plan === "Developer" ? 4 : "")}
                       onChange={(e) => cambiarRolUsuario(usuario, e.target.value)}
                       disabled={guardando}
                     >
                       {planesDisponibles.map((plan) => (
                         <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
                       ))}
-                      <option value="4">Administrador</option>
+                      <option value="4">Developer</option>
                     </select>
                   </td>
                   <td>{usuario.Ingresos}</td>

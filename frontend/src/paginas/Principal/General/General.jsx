@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -64,14 +64,11 @@ const GastoIngreso = () => {
       return respaldo;
     }
   };
-  // 2. FUNCIÓN DE FORMATEO MEJORADA
   const formatMontoParaInput = (val) => {
     if (val === "" || val === null || val === undefined) return "";
     const stringVal = val.toString();
     const parts = stringVal.split(".");
-    // Agregamos puntos para separar miles
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    // Retornamos con coma si hay decimales, o si el usuario acaba de tipear una coma
     return parts.length > 1
       ? parts[0] + "," + parts[1]
       : (stringVal.endsWith(".") ? parts[0] + "," : parts[0]);
@@ -136,7 +133,7 @@ const GastoIngreso = () => {
       .then(res => res.json())
       .then(data => {
         setIdUsuarioActual(data.IdUsuario);
-        setRolUsuario(data.IdRol); // Guardamos el rol en el estado local
+        setRolUsuario(data.IdRol);
 
         obtenerGastos(data.IdUsuario, cotizacionesData);
         obtenerIngresos(data.IdUsuario, cotizacionesData);
@@ -376,14 +373,10 @@ const GastoIngreso = () => {
   );
 
   const BarraProgreso = ({ actual = 0, objetivo = 0, etiqueta = "Meta", idDivisa }) => {
-    // 1. Aseguramos que los valores sean números
     const valorActual = Number(actual) || 0;
     const valorObjetivo = Number(objetivo) || 0;
-
-    // 2. Calculamos el porcentaje
     const porcentaje = valorObjetivo > 0 ? Math.min(100, (valorActual / valorObjetivo) * 100) : 0;
 
-    // 3. Obtenemos el nombre de la divisa
     const obtenerNombreDivisa = (id) => {
       switch (Number(id)) {
         case 2: return "Creada en USD a ARS";
@@ -450,7 +443,6 @@ const GastoIngreso = () => {
     setModalEditarAbierto(true);
   };
 
-  // --- FUNCIÓN DE ARCHIVADO MODIFICADA CON DOBLE CAPA DE SEGURIDAD ---
   const archivarMesActual = async () => {
     if (!idUsuarioActual) {
       toast.warning("No se encontró un usuario válido para realizar la acción.");
@@ -489,7 +481,6 @@ const GastoIngreso = () => {
   const nombre = localStorage.getItem("Nombre") || "Usuario";
   const apellido = localStorage.getItem("Apellido") || "";
 
-  // Auxiliares para evaluar permisos en el renderizado
   const tienePermisoArchivar = rolUsuario !== null && rolUsuario >= 2;
 
   const gastosOrdenados = useMemo(() => obtenerTopCinco(datosGastos), [datosGastos]);
@@ -505,7 +496,8 @@ const GastoIngreso = () => {
           <p style={{ width: '70%' }}>En este apartado usted verá el balance histórico y acumulado de sus gastos e ingresos. Podrá también establecer metas de ahorro.</p>
           <p>Todas las monedas son convertidas automáticamente a ARS.</p>
           <small style={{ color: "#c8b277", fontWeight: "500", fontStyle: "italic", fontSize: "1.1rem" }}>
-            USD: ${cotizaciones.USD} | EUR: ${cotizaciones.EUR}
+            USD: ${ (Math.ceil((cotizaciones?.USD || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) } | 
+            EUR: ${ (Math.ceil((cotizaciones?.EUR || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }
           </small>
         </div>
 
@@ -516,8 +508,6 @@ const GastoIngreso = () => {
           <Link to="/archivos" className="botonesComparativa">
             Archivos
           </Link>
-
-          {/* BOTÓN CON FILTRO DE ROL, TOOLTIP NATIVO Y TOAST ADAPTADO */}
           <button
             style={{
               width: "220px",
@@ -625,8 +615,6 @@ const GastoIngreso = () => {
       </div>
 
       <div className="contenedor-ahorros-general">
-
-        {/* ENCABEZADO CON CONTADOR DE LÍMITES */}
         <div style={{ marginBottom: "1.5rem" }}>
           <div className="encabezado-ahorros-flex" style={{ marginBottom: "12px" }}>
             <h3 className="titulo-ahorros-general">Objetivos en Curso</h3>
@@ -673,15 +661,12 @@ const GastoIngreso = () => {
           <div className="grid-ahorros-general">
             {metasActivas.map((meta, indice) => (
               <div key={indice} className="tarjeta-ahorro-item">
-
-                {/* Aquí pasamos el IdDivisa como prop nueva */}
                 <BarraProgreso
                   actual={meta.actual}
                   objetivo={meta.objetivo}
                   etiqueta={meta.etiqueta}
                   idDivisa={meta.IdDivisa}
                 />
-
                 <button className="boton-editar-ahorro" onClick={() => abrirModalEditar(meta)}>
                   Editar
                 </button>
@@ -696,7 +681,6 @@ const GastoIngreso = () => {
           />
         )}
 
-        {/* METAS COMPLETADAS (Logros) */}
         {metasCompletadas.length > 0 && (
           <div className="seccion-logros-alcanzados" style={{ marginTop: '2rem' }}>
             <h3 className="titulo-ahorros-general" style={{ color: '#c8b277', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -740,9 +724,8 @@ const GastoIngreso = () => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* MODAL EDITAR META */}
+      </div>
       {modalEditarAbierto && (
         <div className="capa-modal" onClick={() => setModalEditarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -751,7 +734,6 @@ const GastoIngreso = () => {
               <div className="formulario-grupo">
                 <label htmlFor="nombreMeta">
                   Nombre de la Meta
-                  {/* Este es el contador en vivo */}
                   <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '10px' }}>
                     ({metaForm.Nombre ? metaForm.Nombre.length : 0}/100)
                   </span>
@@ -766,11 +748,10 @@ const GastoIngreso = () => {
                   placeholder="Ej: Fondo de Emergencia"
                 />
               </div>
-              {/* INPUT MONTO ACTUAL (GUARDADO) */}
               <div className="formulario-grupo">
                 <label htmlFor="MontoGuardado">Monto Actual ($)</label>
                 <input
-                  type="text" // CORREGIDO: Cambiado a text para permitir la limpieza de comas/puntos
+                  type="text" 
                   name="MontoGuardado"
                   value={formatMontoParaInput(metaForm.MontoGuardado)}
                   onChange={(e) => {
@@ -788,8 +769,6 @@ const GastoIngreso = () => {
                   placeholder="0.00"
                 />
               </div>
-
-              {/* INPUT MONTO OBJETIVO */}
               <div className="formulario-grupo">
                 <label htmlFor="montoObjetivo">Monto Objetivo ($)</label>
                 <input
@@ -822,7 +801,7 @@ const GastoIngreso = () => {
                   locale="es"
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Seleccionar fecha"
-                  className="input-custom-finanzarc" // Agrega tu clase CSS para que coincida con tus inputs
+                  className="input-custom-finanzarc" 
                 />
               </div>
               <div className="formulario-grupo">
@@ -833,7 +812,7 @@ const GastoIngreso = () => {
                   locale="es"
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Seleccionar fecha"
-                  minDate={metaForm.FechaInicio} //Bloquea que elijan una fecha de fin menor a la de inicio
+                  minDate={metaForm.FechaInicio} 
                   className="input-custom-finanzarc"
                 />
               </div>
@@ -866,8 +845,6 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
-
-      {/* MODAL AGREGAR META */}
       {modalAgregarAbierto && (
         <div className="capa-modal" onClick={() => setModalAgregarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -876,7 +853,6 @@ const GastoIngreso = () => {
               <div className="formulario-grupo">
                 <label htmlFor="nombreMeta">
                   Nombre de la Meta
-                  {/* Este es el contador en vivo */}
                   <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '10px' }}>
                     ({metaForm.Nombre ? metaForm.Nombre.length : 0}/100)
                   </span>
@@ -926,7 +902,7 @@ const GastoIngreso = () => {
                   locale="es"
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Seleccionar fecha"
-                  className="input-custom-finanzarc" // Agrega tu clase CSS para que coincida con tus inputs
+                  className="input-custom-finanzarc"
                 />
               </div>
               <div className="formulario-grupo">
@@ -937,15 +913,15 @@ const GastoIngreso = () => {
                   locale="es"
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Seleccionar fecha"
-                  minDate={metaForm.FechaInicio} // TIP: Bloquea que elijan una fecha de fin menor a la de inicio
+                  minDate={metaForm.FechaInicio} 
                   className="input-custom-finanzarc"
                 />
               </div>
               <div className="formulario-grupo">
                 <label htmlFor="divisa">Divisa</label>
                 <select
-                  name="IdDivisa" // Cambiado de "Divisa" a "IdDivisa"
-                  value={metaForm.IdDivisa} // Cambiado de "metaForm.Divisa" a "metaForm.IdDivisa"
+                  name="IdDivisa" 
+                  value={metaForm.IdDivisa} 
                   onChange={manejarCambioInput}
                   id="divisa"
                 >
@@ -966,8 +942,6 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
-
-
       {
         modalArchivarAbierto && (
           <div className="modal-overlay" onClick={() => setModalArchivarAbierto(false)}>
@@ -993,4 +967,3 @@ const GastoIngreso = () => {
 };
 
 export default GastoIngreso;
-

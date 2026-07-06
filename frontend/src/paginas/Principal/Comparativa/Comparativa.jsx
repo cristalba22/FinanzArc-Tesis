@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -155,13 +155,13 @@ const Comparativa = () => {
             const todosIngresos = [...ingresos, ...histIngresos];
             const todosGastos = [...gastos, ...histGastos];
             const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-            const anioActual = new Date().getFullYear();
+            const añoActual = new Date().getFullYear();
 
             // Procesamos todos los datos primero
             const datosPorMes = meses.map((mes, index) => {
                 const totalIngresos = todosIngresos.reduce((acc, item) => {
                     const fecha = new Date(item.FechaIngreso || item.Fecha);
-                    if (fecha.getMonth() === index && fecha.getFullYear() === anioActual) {
+                    if (fecha.getMonth() === index && fecha.getFullYear() === añoActual) {
                         return acc + calcularMontoEnPesos(Number(item.MontoIngreso || item.Monto || 0), item.IdDivisa || 1);
                     }
                     return acc;
@@ -169,7 +169,7 @@ const Comparativa = () => {
 
                 const totalGastos = todosGastos.reduce((acc, item) => {
                     const fecha = new Date(item.FechaGasto || item.Fecha);
-                    if (fecha.getMonth() === index && fecha.getFullYear() === anioActual) {
+                    if (fecha.getMonth() === index && fecha.getFullYear() === añoActual) {
                         return acc + calcularMontoEnPesos(Number(item.MontoGasto || item.Monto || 0), item.IdDivisa || 1);
                     }
                     return acc;
@@ -407,7 +407,7 @@ const Comparativa = () => {
                             className="botonesComparativa btn-principal"
                             onClick={() => toast.info("Redirigiendo a planes...")}
                         >   Explorar Planes</Link>
-                        <Link to="/principal" className="botonesComparativa btn-volver" style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}>Volver al Inicio</Link>
+                        <Link to="/Principal" className="botonesComparativa btn-volver" style={{ textDecoration: 'none', display: 'block', textAlign: 'center' }}>Volver al Inicio</Link>
                     </div>
                 </div>
             </div>
@@ -495,4 +495,3 @@ const Comparativa = () => {
 };
 
 export default Comparativa;
-

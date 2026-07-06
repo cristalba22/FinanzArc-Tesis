@@ -1,45 +1,9 @@
-﻿import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import "../Principal/General/General.css";
 import { toast } from "react-toastify";
 import "./planes.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-
-const normalizarTexto = (texto = "") => {
-  let limpio = String(texto);
-  const reemplazos = {
-    "ÃƒÂ¡": "á",
-    "ÃƒÂ©": "é",
-    "ÃƒÂ­": "í",
-    "ÃƒÂ³": "ó",
-    "ÃƒÂº": "ú",
-    "ÃƒÂ±": "ñ",
-    "Ã¡": "á",
-    "Ã©": "é",
-    "Ã­": "í",
-    "Ã³": "ó",
-    "Ãº": "ú",
-    "Ã±": "ñ",
-    "Â¡": "¡",
-    "Â¿": "¿"
-  };
-
-  Object.entries(reemplazos).forEach(([mal, bien]) => {
-    limpio = limpio.split(mal).join(bien);
-  });
-
-  for (let i = 0; i < 2; i += 1) {
-    if (!/[ÃÂ]/.test(limpio)) break;
-
-    try {
-      limpio = decodeURIComponent(escape(limpio));
-    } catch {
-      break;
-    }
-  }
-
-  return limpio;
-};
 
 // ------------------------------------------------------------------
 // NUEVO COMPONENTE: Procesador de detalles optimizado con React.memo
@@ -49,7 +13,7 @@ const DetallesLista = memo(({ texto }) => {
     return <p className="detalle-vacio">Sin descripción disponible.</p>;
   }
 
-  const lineas = normalizarTexto(texto).split("\n").map(line => line.trim()).filter(line => line.length > 0);
+  const lineas = texto.split("\n").map(line => line.trim()).filter(line => line.length > 0);
 
   if (lineas.length === 0) {
     return <p className="detalle-vacio">Sin descripción disponible.</p>;
@@ -219,7 +183,8 @@ const PlanesCompra = () => {
       <div className="seccion-encabezado-general planes-introduccion">
         <div className="titulo-principal-general planes-encabezado">
           <h2>Planes de Suscripción</h2>
-          <p style={{marginBottom: '50px'}}>Centralice su gestión financiera con nuestros planes creados para usted.</p>
+
+          <p style={{marginBottom: '50px'}}>Evolucione la forma en que administra su dinero. Descubra el plan estratégico ideal para usted.</p>
           
           {/* Nuevo selector visual de suscripción */}
           <div className="selector-suscripcion">
@@ -248,7 +213,7 @@ const PlanesCompra = () => {
 
       <div className="contenedor-planes-grid">
         {planesFiltrados.map((p) => {
-          const textoDetalle = normalizarTexto(p.Detalle || p.Detalles || "").replace(". ", ".\n> ");
+          const textoDetalle = (p.Detalle || p.Detalles || "").replace(". ", ".\n> ");
 
           return (
            <div key={p.IdPlan} className="tarjeta-plan">
@@ -362,4 +327,3 @@ const PlanesCompra = () => {
 };
 
 export default PlanesCompra;
-
