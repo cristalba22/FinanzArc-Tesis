@@ -6,6 +6,23 @@ import { obtenerTasas } from "../../../apiConfig";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
+const repararTexto = (texto) => {
+  if (!texto) return "";
+  return texto
+    .replaceAll("DÃ©bito", "Debito")
+    .replaceAll("CrÃ©dito", "Credito")
+    .replaceAll("AutomÃ¡tico", "Automatico")
+    .replaceAll("CategorÃ­a", "Categoria")
+    .replaceAll("DescripciÃ³n", "Descripcion")
+    .replaceAll("HistÃ³rico", "Historico")
+    .replaceAll("Ã­", "i")
+    .replaceAll("Ã¡", "a")
+    .replaceAll("Ã©", "e")
+    .replaceAll("Ã³", "o")
+    .replaceAll("Ãº", "u")
+    .replaceAll("Ã±", "n");
+};
+
 function Gasto() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [listaGastos, setListaGastos] = useState([]);
@@ -60,7 +77,7 @@ function Gasto() {
     fetchCatalogos();
   }, []);
 
-  const obtenerDatosUsuarioYRegistros = async () => {
+  async function obtenerDatosUsuarioYRegistros() {
     const token = localStorage.getItem("Token");
     try {
       const res = await fetch(`${API_BASE_URL}/Usuarios/ByToken`, { headers: { "Authorization": `Bearer ${token}` } });
@@ -68,7 +85,7 @@ function Gasto() {
       setForm(prev => ({ ...prev, IdUsuario: usuario.IdUsuario }));
       cargarGastos(usuario.IdUsuario);
     } catch (err) { console.error("Error", err); }
-  };
+  }
 
   const cargarGastos = (idUsuario) => {
     fetch(`${API_BASE_URL}/Gasto/ByUsuario/${idUsuario}`, { headers: { "Authorization": `Bearer ${localStorage.getItem("Token")}` } })
@@ -219,7 +236,7 @@ function Gasto() {
 
                 <text x="50%" y="50%" fill="#fff" textAnchor="middle" dominantBaseline="central">
                   <tspan x="50%" dy="-0.5em" fontSize="14" fill="#c8b277" fontWeight="bold">Total (ARS)</tspan>
-                  <tspan x="50%" dy="1.5em" fontSize="20" fontWeight="bold" fill="#FF4B4B">${totalMonto.toLocaleString()}</tspan>
+                  <tspan x="50%" dy="1.5em" fontSize="20" fontWeight="bold" fill="#FF4B4B">${totalMonto.toLocaleString("es-AR")}</tspan>
                 </text>
               </PieChart>
             </ResponsiveContainer>
@@ -296,7 +313,7 @@ function Gasto() {
             <div className="formulario-grupo">
               <label>Modo de Pago</label>
               <p>
-                {modosPago.find(m => m.IdModoPago === itemSeleccionado.IdModoPago)?.Nombre || "Cargando..."}
+                {repararTexto(modosPago.find(m => m.IdModoPago === itemSeleccionado.IdModoPago)?.Nombre) || "Cargando..."}
               </p>
             </div>
 
@@ -393,7 +410,7 @@ function Gasto() {
                 >
                   {modosPago.map(modo => (
                     <option key={modo.IdModoPago} value={modo.IdModoPago}>
-                      {modo.Nombre}
+                      {repararTexto(modo.Nombre)}
                     </option>
                   ))}
                 </select>

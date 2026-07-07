@@ -42,15 +42,15 @@ const Archivos = () => {
     if (!usuario || !usuario.IdUsuario) return;
     setCargandoTransacciones(true);
     const token = localStorage.getItem("Token");
-    const endpoint = tipo === "ingreso" ? "HistorialIngreso" : "HistorialGasto";
+    const endpoint = tipo === "ingreso" ? "Ingreso" : "Gasto";
     try {
       const response = await fetch(`${API_BASE_URL}/${endpoint}/ByUsuario/${usuario.IdUsuario}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        if (tipo === "ingreso") setHistorialIngresos(data);
-        else setHistorialGastos(data);
+        if (tipo === "ingreso") setHistorialIngresos(Array.isArray(data) ? data : []);
+        else setHistorialGastos(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error("Error al cargar transacciones:", error);
@@ -120,8 +120,8 @@ const Archivos = () => {
       const [resIngresos, resGastos, resHistIng, resHistGas] = await Promise.all([
         fetch(`${API_BASE_URL}/DocumentoIngreso/Listar`, { headers: { "Authorization": `Bearer ${token}` } }),
         fetch(`${API_BASE_URL}/DocumentoGasto/Listar`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`${API_BASE_URL}/HistorialIngreso/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`${API_BASE_URL}/HistorialGasto/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } })
+        fetch(`${API_BASE_URL}/Ingreso/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/Gasto/ByUsuario/${datosUsuario.IdUsuario}`, { headers: { "Authorization": `Bearer ${token}` } })
       ]);
 
       if (!resIngresos.ok || !resGastos.ok) throw new Error("Error al recuperar los catálogos documentales.");
@@ -313,7 +313,7 @@ const Archivos = () => {
                     <div className="detalles-archivo-item">
                       <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
                       <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdIngreso ? (historialIngresos.find(h => h.IdHistorialIngreso === doc.IdIngreso)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
+                      <p><strong>Ref:</strong> {doc.IdIngreso ? (historialIngresos.find(h => h.IdIngreso === doc.IdIngreso)?.Descripcion || "No encontrada") : "Sin asignacion"}</p>
                     </div>
                     <div className="acciones-archivo-item">
                       <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
@@ -359,7 +359,7 @@ const Archivos = () => {
                     <div className="detalles-archivo-item">
                       <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
                       <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdGasto ? (historialGastos.find(h => h.IdHistorialGasto === doc.IdGasto)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
+                      <p><strong>Ref:</strong> {doc.IdGasto ? (historialGastos.find(h => h.IdGasto === doc.IdGasto)?.Descripcion || "No encontrada") : "Sin asignacion"}</p>
                     </div>
                     <div className="acciones-archivo-item">
                       <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
@@ -398,12 +398,19 @@ const Archivos = () => {
                 </select>
               </div>
               <div className="formulario-grupo">
-                <label>Seleccionar Transacción</label>
+                <label>Seleccionar Transaccion</label>
                 <select value={idTransaccion} onChange={(e) => setIdTransaccion(e.target.value)} required>
                   <option value="">-- Seleccione --</option>
-                  {(tipoSubida === "ingreso" ? historialIngresos : historialGastos).map((item) => {
-                    const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;
-                    return <option key={id} value={id}>{item.Descripcion} - ${item.Monto}</option>;
+                  {cargandoTransacciones && <option value="">Cargando movimientos...</option>}
+                  {!cargandoTransacciones && (tipoSubida === "ingreso" ? historialIngresos : historialGastos).map((item) => {
+                    const id = tipoSubida === "ingreso" ? item.IdIngreso : item.IdGasto;
+                    const monto = tipoSubida === "ingreso" ? item.MontoIngreso : item.MontoGasto;
+                    const fecha = tipoSubida === "ingreso" ? item.FechaIngreso : item.FechaGasto;
+                    return (
+                      <option key={id} value={id}>
+                        {item.Descripcion || "Sin descripcion"} - ${Number(monto || 0).toLocaleString("es-AR")} - {new Date(fecha).toLocaleDateString("es-AR")}
+                      </option>
+                    );
                   })}
                 </select>
               </div>
@@ -413,7 +420,9 @@ const Archivos = () => {
               </div>
               <div className="formulario-acciones">
                 <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-                <button type="submit" className="boton-primario">Subir</button>
+                <button type="submit" className="boton-primario" disabled={subiendo}>
+                  {subiendo ? "Subiendo..." : "Subir"}
+                </button>
               </div>
             </form>
 

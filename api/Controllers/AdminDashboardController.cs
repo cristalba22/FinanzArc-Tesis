@@ -141,6 +141,7 @@ namespace WebApplication.Controllers
                     .Select(u => new
                     {
                         u.IdUsuario,
+                        IdRol = u.IdRol ?? 1,
                         Nombre = ((u.Nombre ?? "") + " " + (u.Apellido ?? "")).Trim(),
                         u.NombreUsuario,
                         u.Email,

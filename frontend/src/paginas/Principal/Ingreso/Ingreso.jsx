@@ -40,21 +40,6 @@ function Ingreso() {
   });
 
   useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        const tasasActuales = await obtenerTasas();
-        if (tasasActuales && typeof tasasActuales === 'object') {
-          setTasas(tasasActuales);
-        }
-      } catch (error) {
-        console.error("Error al cargar tasas, usando valores por defecto:", error);
-      }
-      obtenerDatosUsuarioYRegistros();
-    };
-    cargarDatos();
-  }, []);
-
-  useEffect(() => {
     const fetchTipoIngreso = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/TipoIngreso`);
@@ -82,7 +67,7 @@ function Ingreso() {
 
   const COLORES = ["#007AFF", "#FF9500", "#34C759", "#AF52DE"];
 
-  const obtenerDatosUsuarioYRegistros = async () => {
+  async function obtenerDatosUsuarioYRegistros() {
     const token = localStorage.getItem("Token");
     try {
       const res = await fetch(`${API_BASE_URL}/Usuarios/ByToken`, {
@@ -94,7 +79,7 @@ function Ingreso() {
     } catch (err) {
       console.error("Error al identificar usuario", err);
     }
-  };
+  }
 
   const cargarIngresos = (idUsuario) => {
     fetch(`${API_BASE_URL}/Ingreso/ByUsuario/${idUsuario}`, {
@@ -104,6 +89,21 @@ function Ingreso() {
       .then(data => setListaIngresos(data))
       .catch(err => console.error("Error cargando ingresos", err));
   };
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const tasasActuales = await obtenerTasas();
+        if (tasasActuales && typeof tasasActuales === 'object') {
+          setTasas(tasasActuales);
+        }
+      } catch (error) {
+        console.error("Error al cargar tasas, usando valores por defecto:", error);
+      }
+      obtenerDatosUsuarioYRegistros();
+    };
+    cargarDatos();
+  }, []);
 
   const manejarGuardar = async () => {
     const esEdicion = form.IdIngreso !== null;

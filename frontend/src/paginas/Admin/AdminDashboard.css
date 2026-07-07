@@ -395,6 +395,28 @@
   max-width: 560px;
 }
 
+.admin-money-original {
+  display: block;
+  margin-top: 4px;
+  color: #9d9d9d;
+  font-size: .74rem;
+}
+
+.admin-error {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(207, 75, 75, .38);
+  border-radius: 8px;
+  color: #ffb0b0;
+  background: rgba(207, 75, 75, .12);
+}
+
+.admin-filter-grid option,
+.admin-inline-select option {
+  background: #202020;
+  color: #f4f4f4;
+}
+
 
 @media (max-width: 1020px) {
 

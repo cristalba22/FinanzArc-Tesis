@@ -11,13 +11,13 @@ import {
   YAxis
 } from "recharts";
 import { toast } from "react-toastify";
-import "./AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
-// Asumo que tu componente SinPermisos lo manejas desde las rutas, 
-// o si lo renderizas condicionalmente podés usarlo más abajo.
+import { obtenerTasas } from "../../apiConfig";
+import "./AdminDashboard.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const COLORS = ["#76643c", "#c8b277", "#eadeaa", "#ffffff"];
+const DIVISAS = { 1: "ARS", 2: "USD", 3: "EUR" };
 
 const formatoARS = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -25,10 +25,12 @@ const formatoARS = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0
 });
 
-const formatoNumero = new Intl.NumberFormat("es-AR");
+const formatoNumero = new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 2
+});
 
 const filtrosIniciales = {
-  año: "",
+  anio: "",
   mes: "",
   idUsuario: "",
   idRol: "",
@@ -59,54 +61,86 @@ const obtenerFechaInput = (fecha) => {
   return d.toISOString().slice(0, 10);
 };
 
+const normalizarPlan = (plan, idRol) => {
+  if (Number(idRol) === 4 || plan === "Administrador" || plan === "Developer") return "Developer";
+  return plan || "Sin plan";
+};
+
+const convertirAPesos = (monto, idDivisa, tasas) => {
+  const valor = Number(monto) || 0;
+  if (Number(idDivisa) === 2) return valor * Number(tasas.USD || 0);
+  if (Number(idDivisa) === 3) return valor * Number(tasas.EUR || 0);
+  return valor;
+};
+
+const obtenerIdRolDesdePlan = (usuario, planes) => {
+  if (usuario?.IdRol) return Number(usuario.IdRol);
+  if (usuario?.Plan === "Administrador" || usuario?.Plan === "Developer") return 4;
+  const plan = planes.find((p) => p.Nombre === usuario?.Plan);
+  return plan?.IdRol || "";
+};
+
 const AdminDashboard = () => {
-  const navigate = useNavigate(); // Hook instanciado en la raíz
+  const navigate = useNavigate();
 
-  const [verificado, setVerificado] = useState(false); // Nuevo estado para validar rol real
-  const [verificandoPermisos, setVerificandoPermisos] = useState(true);
-
+  const [verificado, setVerificado] = useState(false);
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+  const [tasas, setTasas] = useState({ USD: 1450, EUR: 1650 });
   const [filtros, setFiltros] = useState({
     ...filtrosIniciales,
-    año: String(new Date().getFullYear())
+    anio: String(new Date().getFullYear())
   });
   const [movimientoEditando, setMovimientoEditando] = useState(null);
 
-  // 1. Verificación contra el Backend (C# API)
+  useEffect(() => {
+    obtenerTasas()
+      .then((valores) => {
+        if (valores?.USD && valores?.EUR) setTasas(valores);
+      })
+      .catch(() => setTasas({ USD: 1450, EUR: 1650 }));
+  }, []);
+
   useEffect(() => {
     const verificarAcceso = async () => {
-
       const token = localStorage.getItem("Token");
-      if (!token) { setCargando(false); return; }
+      if (!token) {
+        setCargando(false);
+        navigate("/sin-permisos");
+        return;
+      }
+
       try {
-        const res = await fetch(`${API_BASE_URL}/Usuarios/ByToken`, { headers: { "Authorization": `Bearer ${token}` } });
-        if (res.ok) {
+        const res = await fetch(`${API_BASE_URL}/Usuarios/ByToken`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-          const user = await res.json();
-          const rolUsuario = user.IdRol || user.idRol;
-
-          // Permitimos acceso general a Roles 2 (Gold), 3 (Platinum) y 4 (Dev)
-          if (user.IdRol === 4) {
-            setVerificado(true);
-            setCargando(false);
-          } else {
-            navigate("/sin-permisos");
-          }
-        } else {
-
+        if (!res.ok) {
           setCargando(false);
+          navigate("/sin-permisos");
+          return;
         }
-      } catch (error) { console.error(error); setCargando(false); }
+
+        const user = await res.json();
+        const rolUsuario = Number(user.IdRol || user.idRol);
+
+        if (rolUsuario === 4) {
+          setVerificado(true);
+        } else {
+          navigate("/sin-permisos");
+        }
+      } catch (err) {
+        console.error(err);
+        setCargando(false);
+        navigate("/sin-permisos");
+      }
     };
+
     verificarAcceso();
   }, [navigate]);
 
-
-
-  // 2. Construcción de Query Params
   const construirQuery = useCallback(() => {
     const params = new URLSearchParams();
     Object.entries(filtros).forEach(([key, value]) => {
@@ -117,7 +151,6 @@ const AdminDashboard = () => {
     return params.toString();
   }, [filtros]);
 
-  // 3. Carga del Dashboard (Sólo si ya está verificado)
   const cargarDashboard = useCallback(async () => {
     setCargando(true);
     setError("");
@@ -146,14 +179,10 @@ const AdminDashboard = () => {
     }
   }, [construirQuery]);
 
-  // Ejecutar carga de dashboard sólo cuando cambie a verificado = true o cambien los filtros manuales
   useEffect(() => {
-    if (verificado) {
-      cargarDashboard();
-    }
+    if (verificado) cargarDashboard();
   }, [verificado, cargarDashboard]);
 
-  // Resto de las funciones operativas
   const ejecutarAccion = async (url, opciones, mensajeOk) => {
     setGuardando(true);
     try {
@@ -227,22 +256,39 @@ const AdminDashboard = () => {
     if (ok) setMovimientoEditando(null);
   };
 
+  const usuariosFiltro = datos?.ActividadPorUsuario || [];
+  const planesDisponibles = datos?.PlanesDisponibles || [];
+  const movimientos = datos?.Movimientos || [];
+
   const planesConPorcentaje = useMemo(() => {
     if (!datos?.UsuariosPorPlan) return [];
 
     return datos.UsuariosPorPlan.map((plan) => ({
       ...plan,
+      Plan: normalizarPlan(plan.Plan, plan.IdRol),
       Porcentaje: datos.TotalUsuarios > 0
         ? Number(((Number(plan.Usuarios) * 100) / Number(datos.TotalUsuarios)).toFixed(1))
         : 0
     }));
   }, [datos]);
 
-  const usuariosFiltro = datos?.ActividadPorUsuario || [];
-  const planesDisponibles = datos?.PlanesDisponibles || [];
+  const resumenMovimientos = useMemo(() => {
+    return movimientos.reduce((acc, movimiento) => {
+      const montoARS = convertirAPesos(movimiento.Monto, movimiento.IdDivisa, tasas);
 
-  // PANTALLAS DE CARGA Y ERROR TEMPRANAS
+      if (movimiento.Tipo === "Ingreso") acc.ingresos += montoARS;
+      if (movimiento.Tipo === "Gasto") acc.gastos += montoARS;
 
+      const idUsuario = movimiento.IdUsuario;
+      if (!acc.porUsuario[idUsuario]) {
+        acc.porUsuario[idUsuario] = { ingresos: 0, gastos: 0 };
+      }
+      if (movimiento.Tipo === "Ingreso") acc.porUsuario[idUsuario].ingresos += montoARS;
+      if (movimiento.Tipo === "Gasto") acc.porUsuario[idUsuario].gastos += montoARS;
+
+      return acc;
+    }, { ingresos: 0, gastos: 0, porUsuario: {} });
+  }, [movimientos, tasas]);
 
   const rentabilidadReferencia = datos?.MrrEstimado > 0
     ? Math.min(100, (Number(datos.MrrEstimado) / 100000) * 100)
@@ -250,9 +296,6 @@ const AdminDashboard = () => {
 
   return (
     <main className="admin-dashboard">
-
-
-
       <section className="admin-hero">
         <span className="admin-kicker">Panel Developer / Administrador</span>
         <div>
@@ -260,7 +303,7 @@ const AdminDashboard = () => {
           <p>
             Gestiona usuarios, suscripciones y movimientos en tiempo real. Este panel refleja
             exclusivamente los registros activos; los datos archivados se trasladan
-            automáticamente al Historial.
+            automaticamente al Historial.
           </p>
         </div>
       </section>
@@ -291,11 +334,11 @@ const AdminDashboard = () => {
           </label>
 
           <label>
-            Año
+            Anio
             <input
               type="number"
-              value={filtros.año}
-              onChange={(e) => setFiltros({ ...filtros, año: e.target.value })}
+              value={filtros.anio}
+              onChange={(e) => setFiltros({ ...filtros, anio: e.target.value })}
               min="2020"
               max="2100"
             />
@@ -343,10 +386,12 @@ const AdminDashboard = () => {
           </label>
 
           <div className="admin-filter-actions">
-            <button className="admin-btn ghost" onClick={() => setFiltros({ ...filtrosIniciales, año: String(new Date().getFullYear()) })}>Limpiar</button>
+            <button className="admin-btn ghost" onClick={() => setFiltros({ ...filtrosIniciales, anio: String(new Date().getFullYear()) })}>Limpiar</button>
           </div>
         </div>
       </section>
+
+      {error && <div className="admin-error">{error}</div>}
 
       <section className="admin-metric-grid">
         <article className="admin-metric-card metric-highlight">
@@ -378,7 +423,7 @@ const AdminDashboard = () => {
         <article className="admin-panel admin-chart-panel">
           <div className="admin-panel-heading">
             <h2>Distribucion por plan</h2>
-            <span>{datos?.UsuariosPago} pagos / {datos?.UsuariosGratis} gratuitos</span>
+            <span>{datos?.UsuariosPago || 0} pagos / {datos?.UsuariosGratis || 0} gratuitos</span>
           </div>
           <div className="admin-chart-layout">
             <ResponsiveContainer width="100%" height={250}>
@@ -451,15 +496,14 @@ const AdminDashboard = () => {
           <div className="admin-usage-grid">
             <div>
               <span>Ingresos cargados</span>
-              <strong>{formatoARS.format(datos?.IngresosRegistradosUsuarios || 0)}</strong>
+              <strong>{formatoARS.format(resumenMovimientos.ingresos)}</strong>
             </div>
             <div>
               <span>Gastos cargados</span>
-              <strong>{formatoARS.format(datos?.GastosRegistradosUsuarios || 0)}</strong>
+              <strong>{formatoARS.format(resumenMovimientos.gastos)}</strong>
             </div>
           </div>
         </article>
-
       </section>
 
       <section className="admin-panel admin-table-panel">
@@ -482,40 +526,47 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {usuariosFiltro.map((usuario) => (
-                <tr key={usuario.IdUsuario}>
-                  <td>
-                    <strong>{usuario.Nombre || usuario.NombreUsuario}</strong>
-                    <span>{usuario.Email}</span>
-                  </td>
-                  <td>
-                    <select
-                      className="admin-inline-select"
-                      value={planesDisponibles.find((p) => p.Nombre === usuario.Plan)?.IdRol || (usuario.Plan === "Developer" ? 4 : "")}
-                      onChange={(e) => cambiarRolUsuario(usuario, e.target.value)}
-                      disabled={guardando}
-                    >
-                      {planesDisponibles.map((plan) => (
-                        <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
-                      ))}
-                      <option value="4">Developer</option>
-                    </select>
-                  </td>
-                  <td>{usuario.Ingresos}</td>
-                  <td>{usuario.Gastos}</td>
-                  <td>{formatoARS.format((usuario.TotalIngresos || 0) - (usuario.TotalGastos || 0))}</td>
-                  <td>
-                    <span className={usuario.Activo ? "admin-status active" : "admin-status inactive"}>
-                      {usuario.Activo ? "Activo" : "Baja"}
-                    </span>
-                  </td>
-                  <td>
-                    <button className={usuario.Activo ? "admin-btn danger small" : "admin-btn primary small"} onClick={() => cambiarEstadoUsuario(usuario)} disabled={guardando}>
-                      {usuario.Activo ? "Dar baja" : "Reactivar"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {usuariosFiltro.map((usuario) => {
+                const resumenUsuario = resumenMovimientos.porUsuario[usuario.IdUsuario];
+                const balanceARS = resumenUsuario
+                  ? resumenUsuario.ingresos - resumenUsuario.gastos
+                  : (usuario.TotalIngresos || 0) - (usuario.TotalGastos || 0);
+
+                return (
+                  <tr key={usuario.IdUsuario}>
+                    <td>
+                      <strong>{usuario.Nombre || usuario.NombreUsuario}</strong>
+                      <span>{usuario.Email}</span>
+                    </td>
+                    <td>
+                      <select
+                        className="admin-inline-select"
+                        value={obtenerIdRolDesdePlan(usuario, planesDisponibles)}
+                        onChange={(e) => cambiarRolUsuario(usuario, e.target.value)}
+                        disabled={guardando}
+                      >
+                        {planesDisponibles.map((plan) => (
+                          <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
+                        ))}
+                        <option value="4">Developer</option>
+                      </select>
+                    </td>
+                    <td>{usuario.Ingresos}</td>
+                    <td>{usuario.Gastos}</td>
+                    <td>{formatoARS.format(balanceARS)}</td>
+                    <td>
+                      <span className={usuario.Activo ? "admin-status active" : "admin-status inactive"}>
+                        {usuario.Activo ? "Activo" : "Baja"}
+                      </span>
+                    </td>
+                    <td>
+                      <button className={usuario.Activo ? "admin-btn danger small" : "admin-btn primary small"} onClick={() => cambiarEstadoUsuario(usuario)} disabled={guardando}>
+                        {usuario.Activo ? "Dar baja" : "Reactivar"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -534,13 +585,14 @@ const AdminDashboard = () => {
                 <th>Tipo</th>
                 <th>Usuario</th>
                 <th>Descripcion</th>
-                <th>Monto</th>
+                <th>Monto en ARS</th>
+                <th>Divisa</th>
                 <th>Fecha</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {(datos?.Movimientos || []).map((movimiento) => (
+              {movimientos.map((movimiento) => (
                 <tr key={`${movimiento.Tipo}-${movimiento.Id}`}>
                   <td>
                     <span className={movimiento.Tipo === "Ingreso" ? "admin-status active" : "admin-status inactive"}>
@@ -549,7 +601,15 @@ const AdminDashboard = () => {
                   </td>
                   <td>{movimiento.Usuario}</td>
                   <td>{movimiento.Descripcion || "Sin descripcion"}</td>
-                  <td>{formatoARS.format(movimiento.Monto || 0)}</td>
+                  <td>
+                    <strong>{formatoARS.format(convertirAPesos(movimiento.Monto, movimiento.IdDivisa, tasas))}</strong>
+                    {Number(movimiento.IdDivisa) !== 1 && (
+                      <small className="admin-money-original">
+                        {DIVISAS[movimiento.IdDivisa] || "DIV"} {formatoNumero.format(movimiento.Monto || 0)}
+                      </small>
+                    )}
+                  </td>
+                  <td>{DIVISAS[movimiento.IdDivisa] || "ARS"}</td>
                   <td>{new Date(movimiento.Fecha).toLocaleDateString("es-AR")}</td>
                   <td className="admin-actions-cell">
                     <button className="admin-btn ghost small" onClick={() => setMovimientoEditando({ ...movimiento, Fecha: obtenerFechaInput(movimiento.Fecha) })}>Editar</button>
@@ -557,9 +617,9 @@ const AdminDashboard = () => {
                   </td>
                 </tr>
               ))}
-              {(datos?.Movimientos || []).length === 0 && (
+              {movimientos.length === 0 && (
                 <tr>
-                  <td colSpan="6">No hay movimientos para los filtros seleccionados.</td>
+                  <td colSpan="7">No hay movimientos para los filtros seleccionados.</td>
                 </tr>
               )}
             </tbody>
@@ -581,7 +641,7 @@ const AdminDashboard = () => {
                 />
               </div>
               <div className="formulario-grupo">
-                <label>Monto</label>
+                <label>Monto original</label>
                 <input
                   type="number"
                   min="0"

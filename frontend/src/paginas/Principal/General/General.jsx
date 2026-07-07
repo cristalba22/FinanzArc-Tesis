@@ -73,15 +73,9 @@ const GastoIngreso = () => {
       ? parts[0] + "," + parts[1]
       : (stringVal.endsWith(".") ? parts[0] + "," : parts[0]);
   };
-  const [modalConectarAbierto, setModalConectarAbierto] = useState(false);
-  const [modalImportarAbierto, setModalImportarAbierto] = useState(false);
   const [modalAgregarAbierto, setModalAgregarAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
   const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
-  const [cargandoConexion, setCargandoConexion] = useState(false);
-  const [cargandoCsv, setCargandoCsv] = useState(false);
-
-  const [archivoCsv, setArchivoCsv] = useState(null);
 
   const [metaForm, setMetaForm] = useState({
     IdMetaAhorro: null,
