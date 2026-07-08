@@ -28,7 +28,7 @@ const Inicio = () => {
         <div className="containerPropuesta" id="propuesta">
           <div className="containerPropuestaIzquierda">
             <div className="introduccion">
-              <h1>Tome el control absoluto de su patrimonio con FinanzARC</h1>
+              <h1>Tome el control absoluto de su patrimonio con FinanzARC - Cambio de Agustin Garcia</h1>
               <p>En FinanzARC impulsamos su economía con herramientas diseñadas para llevar sus finanzas personales o las de su empresa al siguiente nivel.</p>
             </div>
             <div className="items">
