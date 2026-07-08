@@ -496,12 +496,13 @@ const GastoIngreso = () => {
         </div>
 
         <div className="botones-functions-comparativas">
-          <Link to="/comparativa" className="botonesComparativa">
+          <Link to="/comparativa" className="botonesComparativa acciones">
             Mostrar Balance
           </Link>
-          <Link to="/archivos" className="botonesComparativa">
+          <Link to="/archivos" className="botonesComparativa acciones">
             Archivos
           </Link>
+          
           <button
             style={{
               width: "220px",
@@ -522,6 +523,7 @@ const GastoIngreso = () => {
             Archivar Historico
           </button>
         </div>
+        
       </div>
 
       <div className="panel-graficos-general">

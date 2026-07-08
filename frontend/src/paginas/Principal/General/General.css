@@ -434,11 +434,14 @@ TODO EL CUERPO DE LA PAGINA (1210px)
     min-height: 44px;
     box-sizing: border-box;
 }
+
 .botonesComparativa:hover {
-    background: #D4AF37;
-    color: #000;
+     background: rgba(200, 178, 119, 0.15);
+    color: var(--crisp-white);
+    border-color: rgba(200, 178, 119, 0.5);
+    box-shadow: 0 4px 15px rgba(200, 178, 119, 0.15);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, .1);
+
 }
 
 .botonesComparativa.btn-principal {
@@ -494,6 +497,11 @@ TODO EL CUERPO DE LA PAGINA (1210px)
         animation: aparecerSuave 0.8s ease-out forwards;
     }
 }
+@media (max-width: 825px) {
+    .botonesComparativa{
+        width: 250px!important;
+    }
+}
 @media (max-width: 810px) {
     .contenedor-principal-general {
         padding: 100px 20px 40px;
@@ -517,6 +525,7 @@ TODO EL CUERPO DE LA PAGINA (1210px)
     .leyenda-grafico {
         width: 100%;
     }
+
 }
 @media (max-width: 480px) {
     .seccion-encabezado-general h2 {

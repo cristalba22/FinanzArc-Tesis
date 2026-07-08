@@ -585,7 +585,7 @@ const AdminDashboard = () => {
                 <th>Tipo</th>
                 <th>Usuario</th>
                 <th>Descripcion</th>
-                <th>Monto en ARS</th>
+                <th>Monto Ingresado</th>
                 <th>Divisa</th>
                 <th>Fecha</th>
                 <th>Acciones</th>
@@ -602,10 +602,15 @@ const AdminDashboard = () => {
                   <td>{movimiento.Usuario}</td>
                   <td>{movimiento.Descripcion || "Sin descripcion"}</td>
                   <td>
-                    <strong>{formatoARS.format(convertirAPesos(movimiento.Monto, movimiento.IdDivisa, tasas))}</strong>
+                    <strong>
+                      {Number(movimiento.IdDivisa) === 1
+                        ? formatoARS.format(movimiento.Monto)
+                        : `${DIVISAS[movimiento.IdDivisa] || "DIV"} ${formatoNumero.format(movimiento.Monto || 0)}`
+                      }
+                    </strong>     
                     {Number(movimiento.IdDivisa) !== 1 && (
                       <small className="admin-money-original">
-                        {DIVISAS[movimiento.IdDivisa] || "DIV"} {formatoNumero.format(movimiento.Monto || 0)}
+                        {formatoARS.format(convertirAPesos(movimiento.Monto, movimiento.IdDivisa, tasas))}
                       </small>
                     )}
                   </td>
