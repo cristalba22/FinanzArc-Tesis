@@ -4,6 +4,10 @@ Thumbs.db
 *.log
 *.zip
 *.rar
+.vercel/
+node_modules/
+dist/
+dist-ssr/
 
 # Frontend
 frontend/node_modules/
