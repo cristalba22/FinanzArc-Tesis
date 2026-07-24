@@ -3,40 +3,9 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 import "./Gasto.css";
 import { obtenerTasas } from "../../../apiConfig";
+import { repararCategoriaGasto, repararTexto } from "../../../utils/texto";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-
-const repararTexto = (texto) => {
-  if (!texto) return "";
-
-  const textoCorregido = String(texto)
-    .replaceAll("D\u00C3\u0192\u00C2\u00A9bito", "D\u00E9bito")
-    .replaceAll("Cr\u00C3\u0192\u00C2\u00A9dito", "Cr\u00E9dito")
-    .replaceAll("Autom\u00C3\u0192\u00C2\u00A1tico", "Autom\u00E1tico")
-    .replaceAll("Categor\u00C3\u0192\u00C2\u00ADa", "Categor\u00EDa")
-    .replaceAll("Descripci\u00C3\u0192\u00C2\u00B3n", "Descripci\u00F3n")
-    .replaceAll("Hist\u00C3\u0192\u00C2\u00B3rico", "Hist\u00F3rico")
-    .replaceAll("Alimentaci\u00C3\u0192\u00C2\u00B3n", "Alimentaci\u00F3n")
-    .replaceAll("Educaci\u00C3\u0192\u00C2\u00B3n", "Educaci\u00F3n")
-    .replaceAll("D\u00C3\u00A9bito", "D\u00E9bito")
-    .replaceAll("Cr\u00C3\u00A9dito", "Cr\u00E9dito")
-    .replaceAll("Autom\u00C3\u00A1tico", "Autom\u00E1tico")
-    .replaceAll("Categor\u00C3\u00ADa", "Categor\u00EDa")
-    .replaceAll("Descripci\u00C3\u00B3n", "Descripci\u00F3n")
-    .replaceAll("Hist\u00C3\u00B3rico", "Hist\u00F3rico")
-    .replaceAll("Alimentaci\u00C3\u00B3n", "Alimentaci\u00F3n")
-    .replaceAll("Educaci\u00C3\u00B3n", "Educaci\u00F3n")
-    .replaceAll("\u00C3\u00AD", "\u00ED")
-    .replaceAll("\u00C3\u00A1", "\u00E1")
-    .replaceAll("\u00C3\u00A9", "\u00E9")
-    .replaceAll("\u00C3\u00B3", "\u00F3")
-    .replaceAll("\u00C3\u00BA", "\u00FA")
-    .replaceAll("\u00C3\u00B1", "\u00F1");
-
-  return textoCorregido.trim().toLowerCase() === "otros ingresos"
-    ? "Otros gastos"
-    : textoCorregido;
-};
 
 function Gasto() {
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -223,7 +192,7 @@ function Gasto() {
               <PieChart>
                 <Pie
                   data={gastosFiltrados.map(i => ({
-                    nombre: i.Descripcion,
+                    nombre: repararTexto(i.Descripcion),
                     valor: calcularMontoEnPesos(Number(i.MontoGasto), i.IdDivisa)
                   }))}
                   paddingAngle={6}
@@ -279,8 +248,8 @@ function Gasto() {
                   gastosFiltrados.map((item) => (
                     <tr key={item.IdGasto}>
                       <td>
-                        <div className="truncate-text" title={item.Descripcion}>
-                          {item.Descripcion}
+                        <div className="truncate-text" title={repararTexto(item.Descripcion)}>
+                          {repararTexto(item.Descripcion)}
                         </div>
                       </td>
                       <td className="monto-destacado" style={{ color: '#FF4B4B' }}>{FormatearMoneda(Number(item.MontoGasto), item.IdDivisa)}</td>
@@ -303,7 +272,7 @@ function Gasto() {
       {vermas && itemSeleccionado && (
         <div className="seccion-detalle-inferior" style={{ marginTop: "20px", padding: "20px", backgroundColor: "#1e1e1f", borderRadius: "12px", border: "1px solid #333", width: "80%" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-            <h2>Detalle: {itemSeleccionado.Descripcion}</h2>
+            <h2>Detalle: {repararTexto(itemSeleccionado.Descripcion)}</h2>
             <button onClick={() => setVerMas(false)} className="btn-link">✕</button>
           </div>
 
@@ -312,7 +281,7 @@ function Gasto() {
             <div className="formulario-grupo">
               <label>Categoría</label>
               <p>
-                {repararTexto(categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre) || "Cargando..."}
+                {repararCategoriaGasto(categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre) || "Cargando..."}
               </p>
             </div>
 
@@ -411,7 +380,7 @@ function Gasto() {
                 >
                   {categorias.map(cat => (
                     <option key={cat.IdCategoria} value={cat.IdCategoria}>
-                      {repararTexto(cat.Nombre)}
+                      {repararCategoriaGasto(cat.Nombre)}
                     </option>
                   ))}
                 </select>

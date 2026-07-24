@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import '../General/General.css';
 import './Comparativa.css';
 import { obtenerTasas } from '../../../apiConfig';
+import { repararTexto } from '../../../utils/texto';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
@@ -109,7 +110,7 @@ const Comparativa = () => {
             });
 
             const listaFormateada = filtrados.map(item => ({
-                nombre: item.Descripcion || item.NombreIngreso || "Registro Histórico",
+                nombre: repararTexto(item.Descripcion || item.NombreIngreso || "Registro Hist\u00F3rico"),
                 valor: calcularMontoEnPesos(Number(item.MontoGasto || item.MontoIngreso || item.Monto || 0), item.IdDivisa || 1)
             }));
 
@@ -468,7 +469,7 @@ const Comparativa = () => {
                                             return (
                                                 <tr key={i}>
                                                     <td>{new Date(item.FechaGasto || item.FechaIngreso || item.Fecha).toLocaleDateString()}</td>
-                                                    <td className='truncate-text-descripcion-detalle'>{item.Descripcion || item.NombreIngreso || "Registro Histórico"}</td>
+                                                    <td className='truncate-text-descripcion-detalle'>{repararTexto(item.Descripcion || item.NombreIngreso || "Registro Hist\u00F3rico")}</td>
                                                     <td className={datosModal.tipo === 'gasto' ? 'texto-rojo' : 'texto-verde'}>
                                                         <span>${Number(monto).toLocaleString()} {moneda}</span>
 

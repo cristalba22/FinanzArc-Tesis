@@ -2,6 +2,7 @@ import React, { useState, useEffect, memo } from "react";
 import "../Principal/General/General.css";
 import { toast } from "react-toastify";
 import "./planes.css";
+import { repararTexto } from "../../utils/texto";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
@@ -13,7 +14,7 @@ const DetallesLista = memo(({ texto }) => {
     return <p className="detalle-vacio">Sin descripción disponible.</p>;
   }
 
-  const lineas = texto.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+  const lineas = repararTexto(texto).split("\n").map(line => line.trim()).filter(line => line.length > 0);
 
   if (lineas.length === 0) {
     return <p className="detalle-vacio">Sin descripción disponible.</p>;
@@ -101,12 +102,12 @@ const PlanesCompra = () => {
         throw new Error(data.message || data.Message || "No se pudo actualizar el plan.");
       }
 
-      localStorage.setItem("PlanActual", data.plan || plan.Nombre || "Plan actualizado");
+      localStorage.setItem("PlanActual", repararTexto(data.plan || plan.Nombre || "Plan actualizado"));
       if (data.nuevoRol) {
         localStorage.setItem("IdRol", data.nuevoRol);
         window.dispatchEvent(new Event("finanzarc-auth"));
       }
-      toast.success(`Tu plan ahora es ${data.plan || plan.Nombre}.`);
+      toast.success(`Tu plan ahora es ${repararTexto(data.plan || plan.Nombre)}.`);
       cargarDatos();
     } catch (error) {
       console.error(error);
@@ -238,7 +239,7 @@ const PlanesCompra = () => {
                   </span>
                 </div>
 
-                <h3>{p.Nombre || `Plan Nivel ${p.IdRol}`}</h3>
+                <h3>{repararTexto(p.Nombre) || `Plan Nivel ${p.IdRol}`}</h3>
                 <h2>${p.Precio} ARS</h2>
 
                 <DetallesLista texto={textoDetalle} />
