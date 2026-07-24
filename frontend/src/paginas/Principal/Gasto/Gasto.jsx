@@ -8,19 +8,34 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const repararTexto = (texto) => {
   if (!texto) return "";
-  return texto
-    .replaceAll("DÃ©bito", "Debito")
-    .replaceAll("CrÃ©dito", "Credito")
-    .replaceAll("AutomÃ¡tico", "Automatico")
-    .replaceAll("CategorÃ­a", "Categoria")
-    .replaceAll("DescripciÃ³n", "Descripcion")
-    .replaceAll("HistÃ³rico", "Historico")
-    .replaceAll("Ã­", "i")
-    .replaceAll("Ã¡", "a")
-    .replaceAll("Ã©", "e")
-    .replaceAll("Ã³", "o")
-    .replaceAll("Ãº", "u")
-    .replaceAll("Ã±", "n");
+
+  const textoCorregido = String(texto)
+    .replaceAll("D\u00C3\u0192\u00C2\u00A9bito", "D\u00E9bito")
+    .replaceAll("Cr\u00C3\u0192\u00C2\u00A9dito", "Cr\u00E9dito")
+    .replaceAll("Autom\u00C3\u0192\u00C2\u00A1tico", "Autom\u00E1tico")
+    .replaceAll("Categor\u00C3\u0192\u00C2\u00ADa", "Categor\u00EDa")
+    .replaceAll("Descripci\u00C3\u0192\u00C2\u00B3n", "Descripci\u00F3n")
+    .replaceAll("Hist\u00C3\u0192\u00C2\u00B3rico", "Hist\u00F3rico")
+    .replaceAll("Alimentaci\u00C3\u0192\u00C2\u00B3n", "Alimentaci\u00F3n")
+    .replaceAll("Educaci\u00C3\u0192\u00C2\u00B3n", "Educaci\u00F3n")
+    .replaceAll("D\u00C3\u00A9bito", "D\u00E9bito")
+    .replaceAll("Cr\u00C3\u00A9dito", "Cr\u00E9dito")
+    .replaceAll("Autom\u00C3\u00A1tico", "Autom\u00E1tico")
+    .replaceAll("Categor\u00C3\u00ADa", "Categor\u00EDa")
+    .replaceAll("Descripci\u00C3\u00B3n", "Descripci\u00F3n")
+    .replaceAll("Hist\u00C3\u00B3rico", "Hist\u00F3rico")
+    .replaceAll("Alimentaci\u00C3\u00B3n", "Alimentaci\u00F3n")
+    .replaceAll("Educaci\u00C3\u00B3n", "Educaci\u00F3n")
+    .replaceAll("\u00C3\u00AD", "\u00ED")
+    .replaceAll("\u00C3\u00A1", "\u00E1")
+    .replaceAll("\u00C3\u00A9", "\u00E9")
+    .replaceAll("\u00C3\u00B3", "\u00F3")
+    .replaceAll("\u00C3\u00BA", "\u00FA")
+    .replaceAll("\u00C3\u00B1", "\u00F1");
+
+  return textoCorregido.trim().toLowerCase() === "otros ingresos"
+    ? "Otros gastos"
+    : textoCorregido;
 };
 
 function Gasto() {
@@ -297,7 +312,7 @@ function Gasto() {
             <div className="formulario-grupo">
               <label>Categoría</label>
               <p>
-                {categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre || "Cargando..."}
+                {repararTexto(categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre) || "Cargando..."}
               </p>
             </div>
 
@@ -396,7 +411,7 @@ function Gasto() {
                 >
                   {categorias.map(cat => (
                     <option key={cat.IdCategoria} value={cat.IdCategoria}>
-                      {cat.Nombre}
+                      {repararTexto(cat.Nombre)}
                     </option>
                   ))}
                 </select>
