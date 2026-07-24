@@ -1,0 +1,11 @@
+api/
+docs/
+dist/
+node_modules/
+versiondash.zip
+*.zip
+*.rar
+
+frontend/node_modules/
+frontend/dist/
+frontend/.vercel/
