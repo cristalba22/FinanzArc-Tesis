@@ -383,6 +383,12 @@ const Archivos = () => {
             )}
           </div>
         </div>
+      
+      
+      
+      
+      
+      
       </div>
 
       {modalAbierto && (
@@ -406,9 +412,10 @@ const Archivos = () => {
                     const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;                    
                     const monto = item.Monto;
                     const fecha = item.Fecha;
+                    const descripcion = item.Descripcion
                     return (
                       <option key={id} value={id}>
-                        {item.Descripcion || "Sin descripcion"} - ${Number(monto || 0).toLocaleString("es-AR")} - {new Date(fecha).toLocaleDateString("es-AR")}
+                        {descripcion || "Sin descripcion"} - ${Number(monto || 0).toLocaleString("es-AR")} - {new Date(fecha).toLocaleDateString("es-AR")}
                       </option>
                     );
                   })}
