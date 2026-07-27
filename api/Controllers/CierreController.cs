@@ -22,45 +22,41 @@ namespace WebApplication.Controllers
                 {
                     try
                     {
-                        // 1. OBTENER TODO LO ACTUAL DEL USUARIO
                         var ingresosVivos = db.Ingreso.Where(x => x.IdUsuario == request.IdUsuario).ToList();
                         var gastosVivos = db.Gasto.Where(x => x.IdUsuario == request.IdUsuario).ToList();
 
-                        // 2. PASAR INGRESOS A HISTORIAL_INGRESO
                         foreach (var i in ingresosVivos)
                         {
                             db.HistorialIngreso.Add(new HistorialIngreso
                             {
                                 IdUsuario = i.IdUsuario,
                                 IdTipoIngreso = i.IdTipoIngreso,
-                                Monto = i.MontoIngreso, // De 'MontoIngreso' a 'Monto'
+                                Monto = i.MontoIngreso,
                                 IdDivisa = i.IdDivisa,
-                                Fecha = i.FechaIngreso, // De 'FechaIngreso' a 'Fecha'
+                                Fecha = i.FechaIngreso,
                                 FechaDeGuardado = DateTime.Now,
-                                Descripcion = i.Descripcion // Agregado para mantener la descripción en el historial
+                                Descripcion = i.Descripcion 
                             });
                         }
 
-                        // 3. PASAR GASTOS A HISTORIAL_GASTO
                         foreach (var g in gastosVivos)
                         {
                             db.HistorialGasto.Add(new HistorialGasto
                             {
                                 IdUsuario = g.IdUsuario,
-                                Idcategoria = g.IdCategoria, // Ojo: verifica 'Idcategoria' vs 'IdCategoria'
-                                Monto = g.MontoGasto,        // De 'MontoGasto' a 'Monto'
+                                Idcategoria = g.IdCategoria, 
+                                Monto = g.MontoGasto,        
                                 IdDivisa = g.IdDivisa,
-                                Fecha = g.FechaGasto,        // De 'FechaGasto' a 'Fecha'
+                                Fecha = g.FechaGasto,     
                                 FechaDeGuardado = DateTime.Now,
-                                Descripcion = g.Descripcion // Agregado para mantener la descripción en el historial
+                                Descripcion = g.Descripcion 
                             });
                         }
 
-                        // 4. ELIMINAR DE TABLAS VIVAS (EMPEZAR DE 0)
                         if (ingresosVivos.Any()) db.Ingreso.RemoveRange(ingresosVivos);
                         if (gastosVivos.Any()) db.Gasto.RemoveRange(gastosVivos);
 
-                        // 5. GUARDAR Y CONFIRMAR
+
                         db.SaveChanges();
                         dbContextTransaction.Commit();
 
