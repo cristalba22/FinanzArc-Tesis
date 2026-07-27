@@ -12,9 +12,13 @@ using WebApi;
 namespace WebApplication.Controllers
 {
     [EnableCors(origins: "http://localhost:5173", headers: "*", methods: "*")]
-    [RoutePrefix("api/DocumentoIngreso")]
-    public class DocumentoIngresoController : ApiController
+    [RoutePrefix("api/DocumentoGasto")]
+    public class DocumentoGastoController : ApiController
     {
+        /// <summary>
+        /// Resuelve la identidad del usuario a partir del token JWT analizando robustamente 
+        /// múltiples variantes de claims dentro del payload crudo.
+        /// </summary>
         private int? ResolverIdUsuarioDesdePeticion()
         {
             try
@@ -107,12 +111,12 @@ namespace WebApplication.Controllers
                         return Content(HttpStatusCode.Unauthorized, "El usuario asociado al token no se encuentra registrado.");
                     }
 
-                    var documentos = db.DocumentoIngreso
+                    var documentos = db.DocumentoGasto
                         .Where(d => d.IdUsuario == idUsuarioAutenticado.Value)
                         .Select(d => new
                         {
-                            d.IdDocumentoIngreso,
-                            d.IdIngreso,
+                            d.IdDocumentoGasto,
+                            d.IdGasto,
                             d.NombreArchivoOriginal,
                             d.NombreArchivoFisico,
                             d.RutaArchivo,
@@ -158,12 +162,8 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                var idIngresoForm = httpRequest.Form["IdHistorialIngreso"];
-                if (string.IsNullOrEmpty(idIngresoForm))
-                    {
-                        return BadRequest("Falta el identificador del ingreso asociado.");
-                }
-                int? idIngresoAsociado = string.IsNullOrEmpty(idIngresoForm) ? (int?)null : Convert.ToInt32(idIngresoForm);
+                var idGastoForm = httpRequest.Form["idGasto"];
+                int? idGastoAsociado = string.IsNullOrEmpty(idGastoForm) ? (int?)null : Convert.ToInt32(idGastoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
@@ -191,10 +191,10 @@ namespace WebApplication.Controllers
 
                     archivoFisico.SaveAs(rutaFisicaCompleta);
 
-                    var nuevoDocumento = new DocumentoIngreso
+                    var nuevoDocumento = new DocumentoGasto
                     {
                         IdUsuario = usuario.IdUsuario,
-                        IdIngreso = (int)idIngresoAsociado,
+                        IdGasto = (int)idGastoAsociado,
                         NombreArchivoOriginal = archivoFisico.FileName,
                         NombreArchivoFisico = nombreFisicoUnico,
                         RutaArchivo = $"/Uploads/{nombreCarpetaUsuario}/{nombreFisicoUnico}",
@@ -204,7 +204,7 @@ namespace WebApplication.Controllers
                         FechaCarga = DateTime.Now
                     };
 
-                    db.DocumentoIngreso.Add(nuevoDocumento);
+                    db.DocumentoGasto.Add(nuevoDocumento);
                     db.SaveChanges();
 
                     return Ok(nuevoDocumento);
@@ -217,8 +217,8 @@ namespace WebApplication.Controllers
         }
 
         [HttpDelete]
-        [Route("Eliminar/{idDocumentoIngreso:int}")]
-        public IHttpActionResult EliminarDocumento(int idDocumentoIngreso)
+        [Route("Eliminar/{idDocumentoGasto:int}")]
+        public IHttpActionResult EliminarDocumento(int idDocumentoGasto)
         {
             int? idUsuarioAutenticado = ResolverIdUsuarioDesdePeticion();
             if (!idUsuarioAutenticado.HasValue)
@@ -231,8 +231,8 @@ namespace WebApplication.Controllers
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
                     // Buscar el documento asegurando que pertenezca al usuario
-                    var documento = db.DocumentoIngreso.FirstOrDefault(d =>
-                        d.IdDocumentoIngreso == idDocumentoIngreso &&
+                    var documento = db.DocumentoGasto.FirstOrDefault(d =>
+                        d.IdDocumentoGasto == idDocumentoGasto &&
                         d.IdUsuario == idUsuarioAutenticado.Value);
 
                     if (documento == null)
@@ -250,10 +250,10 @@ namespace WebApplication.Controllers
                     }
 
                     // Eliminar el registro de la BD
-                    db.DocumentoIngreso.Remove(documento);
+                    db.DocumentoGasto.Remove(documento);
                     db.SaveChanges();
 
-                    return Ok(new { mensaje = "Documento de ingreso eliminado correctamente." });
+                    return Ok(new { mensaje = "Documento de gasto eliminado correctamente." });
                 }
             }
             catch (Exception ex)

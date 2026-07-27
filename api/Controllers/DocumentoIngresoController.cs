@@ -112,7 +112,7 @@ namespace WebApplication.Controllers
                         .Select(d => new
                         {
                             d.IdDocumentoIngreso,
-                            d.IdHistorialIngreso, // <-- Corregido para que apunte al Historial
+                            d.IdIngreso,
                             d.NombreArchivoOriginal,
                             d.NombreArchivoFisico,
                             d.RutaArchivo,
@@ -158,18 +158,8 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                
-                // 1. Leemos el campo exacto que manda el frontend
-                var idHistorialIngresoForm = httpRequest.Form["IdHistorialIngreso"];
-                
-                // 2. Validamos que el dato exista
-                if (string.IsNullOrEmpty(idHistorialIngresoForm))
-                {
-                    return BadRequest("Falta el identificador del historial de ingreso asociado.");
-                }
-                
-                // 3. Convertimos a entero de forma segura
-                int idHistorialIngresoAsociado = Convert.ToInt32(idHistorialIngresoForm);
+                var idIngresoForm = httpRequest.Form["idIngreso"];
+                int? idIngresoAsociado = string.IsNullOrEmpty(idIngresoForm) ? (int?)null : Convert.ToInt32(idIngresoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
@@ -200,7 +190,7 @@ namespace WebApplication.Controllers
                     var nuevoDocumento = new DocumentoIngreso
                     {
                         IdUsuario = usuario.IdUsuario,
-                        IdHistorialIngreso = idHistorialIngresoAsociado, // <-- Corregido para relacionarlo al Historial
+                        IdIngreso = (int)idIngresoAsociado,
                         NombreArchivoOriginal = archivoFisico.FileName,
                         NombreArchivoFisico = nombreFisicoUnico,
                         RutaArchivo = $"/Uploads/{nombreCarpetaUsuario}/{nombreFisicoUnico}",
