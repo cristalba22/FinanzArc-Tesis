@@ -116,7 +116,7 @@ namespace WebApplication.Controllers
                         .Select(d => new
                         {
                             d.IdDocumentoGasto,
-                            d.IdGasto,
+                            d.IdHistorialGasto, // <-- Corregido para que coincida con tu BD y tu Frontend
                             d.NombreArchivoOriginal,
                             d.NombreArchivoFisico,
                             d.RutaArchivo,
@@ -162,14 +162,18 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                var idGastoForm = httpRequest.Form["IdHistorialGasto"];
-                if (string.IsNullOrEmpty(idGastoForm))
-                    {
-                        return BadRequest("Falta el identificador del gasto asociado.");
+                
+                // 1. Leemos exactamente el nombre que manda React
+                var idHistorialGastoForm = httpRequest.Form["IdHistorialGasto"]; 
+                
+                // 2. Validamos que no venga vacío
+                if (string.IsNullOrEmpty(idHistorialGastoForm))
+                {
+                    return BadRequest("Falta el identificador del historial de gasto asociado.");
                 }
-                int idGastoAsociado = Convert.ToInt32(idGastoForm);
-
-                int? idGastoAsociado = string.IsNullOrEmpty(idGastoForm) ? (int?)null : Convert.ToInt32(idGastoForm);
+                
+                // 3. Convertimos a entero de forma segura (sin duplicar variables)
+                int idHistorialGastoAsociado = Convert.ToInt32(idHistorialGastoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
@@ -200,7 +204,7 @@ namespace WebApplication.Controllers
                     var nuevoDocumento = new DocumentoGasto
                     {
                         IdUsuario = usuario.IdUsuario,
-                        IdGasto = (int)idGastoAsociado,
+                        IdHistorialGasto = idHistorialGastoAsociado, // <-- Corregido para relacionarlo al Historial
                         NombreArchivoOriginal = archivoFisico.FileName,
                         NombreArchivoFisico = nombreFisicoUnico,
                         RutaArchivo = $"/Uploads/{nombreCarpetaUsuario}/{nombreFisicoUnico}",

@@ -112,7 +112,7 @@ namespace WebApplication.Controllers
                         .Select(d => new
                         {
                             d.IdDocumentoIngreso,
-                            d.IdIngreso,
+                            d.IdHistorialIngreso, // <-- Corregido para que apunte al Historial
                             d.NombreArchivoOriginal,
                             d.NombreArchivoFisico,
                             d.RutaArchivo,
@@ -158,12 +158,18 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                var idIngresoForm = httpRequest.Form["IdHistorialIngreso"];
-                if (string.IsNullOrEmpty(idIngresoForm))
-                    {
-                        return BadRequest("Falta el identificador del ingreso asociado.");
+                
+                // 1. Leemos el campo exacto que manda el frontend
+                var idHistorialIngresoForm = httpRequest.Form["IdHistorialIngreso"];
+                
+                // 2. Validamos que el dato exista
+                if (string.IsNullOrEmpty(idHistorialIngresoForm))
+                {
+                    return BadRequest("Falta el identificador del historial de ingreso asociado.");
                 }
-                int? idIngresoAsociado = string.IsNullOrEmpty(idIngresoForm) ? (int?)null : Convert.ToInt32(idIngresoForm);
+                
+                // 3. Convertimos a entero de forma segura
+                int idHistorialIngresoAsociado = Convert.ToInt32(idHistorialIngresoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
@@ -194,7 +200,7 @@ namespace WebApplication.Controllers
                     var nuevoDocumento = new DocumentoIngreso
                     {
                         IdUsuario = usuario.IdUsuario,
-                        IdIngreso = (int)idIngresoAsociado,
+                        IdHistorialIngreso = idHistorialIngresoAsociado, // <-- Corregido para relacionarlo al Historial
                         NombreArchivoOriginal = archivoFisico.FileName,
                         NombreArchivoFisico = nombreFisicoUnico,
                         RutaArchivo = $"/Uploads/{nombreCarpetaUsuario}/{nombreFisicoUnico}",
