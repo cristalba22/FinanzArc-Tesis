@@ -155,7 +155,7 @@ const Archivos = () => {
     const token = localStorage.getItem("Token");
     const formData = new FormData();
     formData.append("archivo", archivoSeleccionado);
-
+    console.log(formData);
     let urlUpload = "";
     if (tipoSubida === "ingreso") {
       formData.append("IdHistorialIngreso", idTransaccion);
@@ -269,7 +269,7 @@ const Archivos = () => {
     <div className="contenedor-principal-general">
       <div className="seccion-encabezado-general">
         <div className="titulo-principal-general">
-          <h2 className="h2Archivos">Repositorio de Comprobantes Digitales</h2>
+          <h2 className="h2Archivos">Repositorio de Comprobantes Digitales - Prueba</h2>
         </div>
 
         <div className="contenedor-filtros-documental">
