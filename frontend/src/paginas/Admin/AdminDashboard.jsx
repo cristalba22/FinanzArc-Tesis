@@ -13,6 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { obtenerTasas } from "../../apiConfig";
+import { repararTexto } from "../../utils/texto";
 import "./AdminDashboard.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -76,7 +77,7 @@ const convertirAPesos = (monto, idDivisa, tasas) => {
 const obtenerIdRolDesdePlan = (usuario, planes) => {
   if (usuario?.IdRol) return Number(usuario.IdRol);
   if (usuario?.Plan === "Administrador" || usuario?.Plan === "Developer") return 4;
-  const plan = planes.find((p) => p.Nombre === usuario?.Plan);
+  const plan = planes.find((p) => repararTexto(p.Nombre) === repararTexto(usuario?.Plan));
   return plan?.IdRol || "";
 };
 
@@ -214,7 +215,7 @@ const AdminDashboard = () => {
 
   const cambiarEstadoUsuario = (usuario) => {
     const accion = usuario.Activo ? "dar de baja" : "reactivar";
-    const confirmar = window.confirm(`Seguro que queres ${accion} a ${usuario.Nombre || usuario.NombreUsuario}?`);
+    const confirmar = window.confirm(`Seguro que queres ${accion} a ${repararTexto(usuario.Nombre || usuario.NombreUsuario)}?`);
     if (!confirmar) return;
 
     ejecutarAccion(`/AdminDashboard/Usuarios/${usuario.IdUsuario}/Estado`, {
@@ -350,7 +351,7 @@ const AdminDashboard = () => {
               <option value="">Todos</option>
               {usuariosFiltro.map((usuario) => (
                 <option key={usuario.IdUsuario} value={usuario.IdUsuario}>
-                  {usuario.Nombre || usuario.NombreUsuario}
+                  {repararTexto(usuario.Nombre || usuario.NombreUsuario)}
                 </option>
               ))}
             </select>
@@ -361,7 +362,7 @@ const AdminDashboard = () => {
             <select value={filtros.idRol} onChange={(e) => setFiltros({ ...filtros, idRol: e.target.value })}>
               <option value="">Todos</option>
               {planesDisponibles.map((plan) => (
-                <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
+                <option key={plan.IdRol} value={plan.IdRol}>{repararTexto(plan.Nombre)}</option>
               ))}
               <option value="4">Developer</option>
             </select>
@@ -442,7 +443,7 @@ const AdminDashboard = () => {
                 <div className="admin-plan-row" key={`${plan.Plan}-${plan.IdRol}`}>
                   <span className="admin-plan-dot" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                   <div>
-                    <strong>{plan.Plan}</strong>
+                    <strong>{repararTexto(plan.Plan)}</strong>
                     <small>{plan.Porcentaje}% de usuarios</small>
                   </div>
                   <b>{plan.Usuarios}</b>
@@ -535,7 +536,7 @@ const AdminDashboard = () => {
                 return (
                   <tr key={usuario.IdUsuario}>
                     <td>
-                      <strong>{usuario.Nombre || usuario.NombreUsuario}</strong>
+                      <strong>{repararTexto(usuario.Nombre || usuario.NombreUsuario)}</strong>
                       <span>{usuario.Email}</span>
                     </td>
                     <td>
@@ -546,7 +547,7 @@ const AdminDashboard = () => {
                         disabled={guardando}
                       >
                         {planesDisponibles.map((plan) => (
-                          <option key={plan.IdRol} value={plan.IdRol}>{plan.Nombre}</option>
+                          <option key={plan.IdRol} value={plan.IdRol}>{repararTexto(plan.Nombre)}</option>
                         ))}
                         <option value="4">Developer</option>
                       </select>
@@ -599,8 +600,8 @@ const AdminDashboard = () => {
                       {movimiento.Tipo}
                     </span>
                   </td>
-                  <td>{movimiento.Usuario}</td>
-                  <td>{movimiento.Descripcion || "Sin descripcion"}</td>
+                  <td>{repararTexto(movimiento.Usuario)}</td>
+                  <td>{repararTexto(movimiento.Descripcion) || "Sin descripcion"}</td>
                   <td>
                     <strong>
                       {Number(movimiento.IdDivisa) === 1
@@ -641,7 +642,7 @@ const AdminDashboard = () => {
                 <label>Descripcion</label>
                 <input
                   type="text"
-                  value={movimientoEditando.Descripcion || ""}
+                  value={repararTexto(movimientoEditando.Descripcion) || ""}
                   onChange={(e) => setMovimientoEditando({ ...movimientoEditando, Descripcion: e.target.value })}
                 />
               </div>

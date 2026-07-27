@@ -3,25 +3,9 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 import "./Gasto.css";
 import { obtenerTasas } from "../../../apiConfig";
+import { repararCategoriaGasto, repararTexto } from "../../../utils/texto";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-
-const repararTexto = (texto) => {
-  if (!texto) return "";
-  return texto
-    .replaceAll("DÃ©bito", "Debito")
-    .replaceAll("CrÃ©dito", "Credito")
-    .replaceAll("AutomÃ¡tico", "Automatico")
-    .replaceAll("CategorÃ­a", "Categoria")
-    .replaceAll("DescripciÃ³n", "Descripcion")
-    .replaceAll("HistÃ³rico", "Historico")
-    .replaceAll("Ã­", "i")
-    .replaceAll("Ã¡", "a")
-    .replaceAll("Ã©", "e")
-    .replaceAll("Ã³", "o")
-    .replaceAll("Ãº", "u")
-    .replaceAll("Ã±", "n");
-};
 
 function Gasto() {
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -208,7 +192,7 @@ function Gasto() {
               <PieChart>
                 <Pie
                   data={gastosFiltrados.map(i => ({
-                    nombre: i.Descripcion,
+                    nombre: repararTexto(i.Descripcion),
                     valor: calcularMontoEnPesos(Number(i.MontoGasto), i.IdDivisa)
                   }))}
                   paddingAngle={6}
@@ -264,8 +248,8 @@ function Gasto() {
                   gastosFiltrados.map((item) => (
                     <tr key={item.IdGasto}>
                       <td>
-                        <div className="truncate-text" title={item.Descripcion}>
-                          {item.Descripcion}
+                        <div className="truncate-text" title={repararTexto(item.Descripcion)}>
+                          {repararTexto(item.Descripcion)}
                         </div>
                       </td>
                       <td className="monto-destacado" style={{ color: '#FF4B4B' }}>{FormatearMoneda(Number(item.MontoGasto), item.IdDivisa)}</td>
@@ -288,7 +272,7 @@ function Gasto() {
       {vermas && itemSeleccionado && (
         <div className="seccion-detalle-inferior" style={{ marginTop: "20px", padding: "20px", backgroundColor: "#1e1e1f", borderRadius: "12px", border: "1px solid #333", width: "80%" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-            <h2>Detalle: {itemSeleccionado.Descripcion}</h2>
+            <h2>Detalle: {repararTexto(itemSeleccionado.Descripcion)}</h2>
             <button onClick={() => setVerMas(false)} className="btn-link">✕</button>
           </div>
 
@@ -297,7 +281,7 @@ function Gasto() {
             <div className="formulario-grupo">
               <label>Categoría</label>
               <p>
-                {categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre || "Cargando..."}
+                {repararCategoriaGasto(categorias.find(c => c.IdCategoria === itemSeleccionado.IdCategoria)?.Nombre) || "Cargando..."}
               </p>
             </div>
 
@@ -396,7 +380,7 @@ function Gasto() {
                 >
                   {categorias.map(cat => (
                     <option key={cat.IdCategoria} value={cat.IdCategoria}>
-                      {cat.Nombre}
+                      {repararCategoriaGasto(cat.Nombre)}
                     </option>
                   ))}
                 </select>

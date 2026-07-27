@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
 import "./Ingreso.css";
 import { obtenerTasas } from "../../../apiConfig";
+import { repararTexto } from "../../../utils/texto";
 registerLocale("es", es);
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -182,7 +183,7 @@ function Ingreso() {
 
   const datosGrafico = useMemo(() => {
     const data = ingresosFiltrados.map(i => ({
-      nombre: i.Descripcion,
+      nombre: repararTexto(i.Descripcion),
       valor: calcularMontoEnPesos(Number(i.MontoIngreso), i.IdDivisa)
     }))
     return data.length > 0 ? data : [{ nombre: "Sin datos", valor: 0 }];
@@ -317,8 +318,8 @@ function Ingreso() {
                   ingresosFiltrados.map((item, index) => (
                     <tr key={item.IdIngreso || `temp-${index}`}>
                       <td>
-                        <div className="truncate-text" title={item.Descripcion}>
-                          {item.Descripcion}
+                        <div className="truncate-text" title={repararTexto(item.Descripcion)}>
+                          {repararTexto(item.Descripcion)}
                         </div>
                       </td>
                       <td className="monto-destacado" style={{ color: 'rgb(70, 130, 180)' }}>
@@ -346,14 +347,14 @@ function Ingreso() {
       {vermas && itemSeleccionado && (
         <div className="seccion-detalle-inferior" style={{ marginTop: "20px", padding: "20px", backgroundColor: "#1e1e1f", borderRadius: "12px", border: "1px solid #333", width: "80%" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-            <h2>Detalle: {itemSeleccionado.Descripcion}</h2>
+            <h2>Detalle: {repararTexto(itemSeleccionado.Descripcion)}</h2>
             <button onClick={() => setVerMas(false)} className="btn-link">✕</button>
           </div>
 
           <div className="formulario-grid">
             <div className="formulario-grupo">
               <label>Tipo de Ingreso</label>
-              <p>{tipoIngreso.find(t => t.IdTipoIngreso === itemSeleccionado.IdTipoIngreso)?.Nombre || "Cargando..."}</p>
+              <p>{repararTexto(tipoIngreso.find(t => t.IdTipoIngreso === itemSeleccionado.IdTipoIngreso)?.Nombre) || "Cargando..."}</p>
             </div>
 
             <div className="formulario-grupo">
@@ -436,7 +437,7 @@ function Ingreso() {
                 >
                   {tipoIngreso.map(cat => (
                     <option key={cat.IdTipoIngreso} value={cat.IdTipoIngreso}>
-                      {cat.Nombre}
+                      {repararTexto(cat.Nombre)}
                     </option>
                   ))}
                 </select>

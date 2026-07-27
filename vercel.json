@@ -1,0 +1,19 @@
+{
+  "installCommand": "npm install --prefix frontend",
+  "buildCommand": "npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://finanzarc.runasp.net/api/:path*"
+    },
+    {
+      "source": "/Uploads/:path*",
+      "destination": "http://finanzarc.runasp.net/Uploads/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}
