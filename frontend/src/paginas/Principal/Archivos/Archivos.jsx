@@ -150,12 +150,11 @@ const Archivos = () => {
       return;
     }
 
-
     setSubiendo(true);
     const token = localStorage.getItem("Token");
     const formData = new FormData();
     formData.append("archivo", archivoSeleccionado);
-    console.log(formData);
+    
     let urlUpload = "";
     if (tipoSubida === "ingreso") {
       formData.append("IdIngreso", idTransaccion);
@@ -181,6 +180,7 @@ const Archivos = () => {
       setSubiendo(false);
     }
   };
+
   const eliminarDocumento = async (idDocumento, tipo) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar este comprobante? Esta acción no se puede deshacer.")) return;
 
@@ -188,26 +188,19 @@ const Archivos = () => {
     const endpoint = tipo === "ingreso" ? "DocumentoIngreso" : "DocumentoGasto";
 
     try {
-      // ATENCIÓN: Si te da un error 404 (Not Found), quita la palabra "/Eliminar" de la URL de abajo.
-      // Quedaría así: `${API_BASE_URL}/${endpoint}/${idDocumento}`
       const url = `${API_BASE_URL}/${endpoint}/Eliminar/${idDocumento}`;
-
-      console.log(`Intentando eliminar: ${url}`); // Para debug en consola
-
       const response = await fetch(url, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
 
       if (!response.ok) {
-        // Capturamos el texto del error exacto que manda el servidor
         const errorText = await response.text();
         throw new Error(`Código ${response.status}: ${errorText || "Error en el servidor"}`);
       }
 
       toast.success("Comprobante eliminado con éxito.");
 
-      // Actualizamos el estado usando != para evitar fallos por tipos de datos (string vs int)
       if (tipo === "ingreso") {
         setDocumentosIngreso((prev) => prev.filter(doc => doc.IdDocumentoIngreso != idDocumento));
       } else {
@@ -219,6 +212,7 @@ const Archivos = () => {
       toast.error(`Error al eliminar: ${error.message}`);
     }
   };
+
   const abrirModalCarga = (tipo) => {
     setTipoSubida(tipo);
     setIdTransaccion("");
@@ -292,6 +286,7 @@ const Archivos = () => {
       </div>
 
       <div className="contenedor-paneles-dinamicos">
+        {/* PANEL DE INGRESOS */}
         <div className={`panel-documental-base panel-ingresos-estilo ${panelActivo === "ingreso" ? "panel-estado-maximizando" : ""} ${panelActivo === "gasto" ? "panel-estado-minimizando" : ""}`}>
           <div className="encabezado-tarjeta-modulo" onClick={() => setPanelActivo(panelActivo === "ingreso" ? "ambos" : "ingreso")}>
             <h3>Documentos de Ingresos</h3>
@@ -301,43 +296,50 @@ const Archivos = () => {
               <div className="estado-vacio-documentos"><p>No posee archivos de ingresos cargados en este período.</p></div>
             ) : (
               <div className="grilla-tarjetas-archivos">
-                {ingresosFiltrados.map((doc) => (
-                  <div key={doc.IdDocumentoIngreso} className="tarjeta-archivo-item">
-                    <div className="contenedor-vista-previa">
-                      {esImagen(doc.ExtensionArchivo) ? (
-                        <img src={`${SERVER_HOST}${doc.RutaArchivo}`} alt={doc.NombreArchivoOriginal} className="imagen-preview-render" />
-                      ) : (
-                        <div className="icono-documento-generico"><span>{doc.ExtensionArchivo.replace(".", "").toUpperCase()}</span></div>
-                      )}
+                {ingresosFiltrados.map((doc) => {
+                  // Buscamos la descripción en el historial de ingresos
+                  const historialRelacionado = historialIngresos.find(h => h.IdHistorialIngreso === doc.IdIngreso);
+                  const descripcionRef = historialRelacionado ? historialRelacionado.Descripcion : "Sin asignación";
+
+                  return (
+                    <div key={doc.IdDocumentoIngreso} className="tarjeta-archivo-item">
+                      <div className="contenedor-vista-previa">
+                        {esImagen(doc.ExtensionArchivo) ? (
+                          <img src={`${SERVER_HOST}${doc.RutaArchivo}`} alt={doc.NombreArchivoOriginal} className="imagen-preview-render" />
+                        ) : (
+                          <div className="icono-documento-generico"><span>{doc.ExtensionArchivo.replace(".", "").toUpperCase()}</span></div>
+                        )}
+                      </div>
+                      <div className="detalles-archivo-item">
+                        <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
+                        <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
+                        <p><strong>Ref:</strong> {descripcionRef}</p>
+                      </div>
+                      <div className="acciones-archivo-item">
+                        <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
+                        <button
+                          onClick={() => eliminarDocumento(doc.IdDocumentoIngreso, "ingreso")}
+                          className="boton-eliminar-moderno"
+                          title="Eliminar comprobante"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icono-eliminar">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                          Eliminar
+                        </button>
+                      </div>
                     </div>
-                    <div className="detalles-archivo-item">
-                      <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
-                      <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdHistorialIngreso ? (historialIngresos.find(h => h.IdHistorialIngreso === doc.IdHistorialIngreso)?.Descripcion || "No encontrada") : "Sin asignación"}</p>
-                    </div>
-                    <div className="acciones-archivo-item">
-                      <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
-                      <button
-                        onClick={() => eliminarDocumento(doc.IdDocumentoIngreso, "ingreso")}
-                        className="boton-eliminar-moderno"
-                        title="Eliminar comprobante"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icono-eliminar">
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
+        {/* PANEL DE GASTOS */}
         <div className={`panel-documental-base panel-gastos-estilo ${panelActivo === "gasto" ? "panel-estado-maximizando" : ""} ${panelActivo === "ingreso" ? "panel-estado-minimizando" : ""}`}>
           <div className="encabezado-tarjeta-modulo" onClick={() => setPanelActivo(panelActivo === "gasto" ? "ambos" : "gasto")}>
             <h3>Documentos de Gastos</h3>
@@ -347,54 +349,55 @@ const Archivos = () => {
               <div className="estado-vacio-documentos"><p>No posee archivos de gastos cargados en este período.</p></div>
             ) : (
               <div className="grilla-tarjetas-archivos">
-                {gastosFiltrados.map((doc) => (
-                  <div key={doc.IdDocumentoGasto} className="tarjeta-archivo-item">
-                    <div className="contenedor-vista-previa">
-                      {esImagen(doc.ExtensionArchivo) ? (
-                        <img src={`${SERVER_HOST}${doc.RutaArchivo}`} alt={doc.NombreArchivoOriginal} className="imagen-preview-render" />
-                      ) : (
-                        <div className="icono-documento-generico"><span>{doc.ExtensionArchivo.replace(".", "").toUpperCase()}</span></div>
-                      )}
+                {gastosFiltrados.map((doc) => {
+                  // Buscamos la descripción en el historial de gastos (usando IdGasto o IdHistorialGasto según devuelva tu API)
+                  const idGastoRef = doc.IdGasto || doc.IdHistorialGasto;
+                  const historialRelacionado = historialGastos.find(h => h.IdHistorialGasto === idGastoRef);
+                  const descripcionRef = historialRelacionado ? historialRelacionado.Descripcion : "Sin asignación";
+
+                  return (
+                    <div key={doc.IdDocumentoGasto} className="tarjeta-archivo-item">
+                      <div className="contenedor-vista-previa">
+                        {esImagen(doc.ExtensionArchivo) ? (
+                          <img src={`${SERVER_HOST}${doc.RutaArchivo}`} alt={doc.NombreArchivoOriginal} className="imagen-preview-render" />
+                        ) : (
+                          <div className="icono-documento-generico"><span>{doc.ExtensionArchivo.replace(".", "").toUpperCase()}</span></div>
+                        )}
+                      </div>
+                      <div className="detalles-archivo-item">
+                        <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
+                        <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
+                        <p><strong>Ref:</strong> {descripcionRef}</p>
+                      </div>
+                      <div className="acciones-archivo-item">
+                        <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
+                        <button
+                          onClick={() => eliminarDocumento(doc.IdDocumentoGasto, "gasto")}
+                          className="boton-eliminar-moderno"
+                          title="Eliminar comprobante"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icono-eliminar">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                          Eliminar
+                        </button>
+                      </div>
                     </div>
-                    <div className="detalles-archivo-item">
-                      <h4 title={doc.NombreArchivoOriginal}>{doc.NombreArchivoOriginal}</h4>
-                      <p><strong>Fecha:</strong> {new Date(doc.FechaCarga).toLocaleDateString()}</p>
-                      <p><strong>Ref:</strong> {doc.IdHistorialGasto ? (historialGastos.find(h => h.IdHistorialGasto === doc.IdHistorialGasto)?.Descripcion || "No encontrada") : "Sin asignacion"}</p>
-                    </div>
-                    <div className="acciones-archivo-item">
-                      <a href={`${SERVER_HOST}${doc.RutaArchivo}`} target="_blank" rel="noopener noreferrer" className="enlace-descarga-archivo-btn">Ver / Descargar</a>
-                      <button
-                        onClick={() => eliminarDocumento(doc.IdDocumentoGasto, "gasto")}
-                        className="boton-eliminar-moderno"
-                        title="Eliminar comprobante"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icono-eliminar">
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
-      
-      
-      
-      
-      
-      
       </div>
 
       {modalAbierto && (
         <div className="capa-modal-documentos">
           <div className="contenido-modal-documentos">
-            <h3>Cargar Comprobante Financiero 1</h3>
+            <h3>Cargar Comprobante Financiero</h3>
             <form onSubmit={ejecutarSubidaArchivo}>
               <div className="formulario-grupo">
                 <label>Tipo de Comprobante</label>
@@ -404,18 +407,17 @@ const Archivos = () => {
                 </select>
               </div>
               <div className="formulario-grupo">
-                <label>Seleccionar Transaccion</label>
+                <label>Seleccionar Transacción</label>
                 <select value={idTransaccion} onChange={(e) => setIdTransaccion(e.target.value)} required>
                   <option value="">-- Seleccione --</option>
                   {cargandoTransacciones && <option value="">Cargando movimientos...</option>}
                   {!cargandoTransacciones && (tipoSubida === "ingreso" ? historialIngresos : historialGastos).map((item) => {
-                    const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;                    
+                    const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;                     
                     const monto = item.Monto;
                     const fecha = item.Fecha;
-                    const descripcion = item.Descripcion
                     return (
                       <option key={id} value={id}>
-                        {descripcion || "Sin descripcion"} - ${Number(monto || 0).toLocaleString("es-AR")} - {new Date(fecha).toLocaleDateString("es-AR")}
+                        {item.Descripcion || "Sin descripción"} - ${Number(monto || 0).toLocaleString("es-AR")} - {new Date(fecha).toLocaleDateString("es-AR")}
                       </option>
                     );
                   })}
@@ -432,7 +434,6 @@ const Archivos = () => {
                 </button>
               </div>
             </form>
-
           </div>
         </div>
       )}
