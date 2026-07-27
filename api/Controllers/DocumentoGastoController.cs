@@ -162,7 +162,13 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                var idGastoForm = httpRequest.Form["idGasto"];
+                var idGastoForm = httpRequest.Form["IdHistorialGasto"];
+                if (string.IsNullOrEmpty(idGastoForm))
+                    {
+                        return BadRequest("Falta el identificador del gasto asociado.");
+                }
+                int idGastoAsociado = Convert.ToInt32(idGastoForm);
+
                 int? idGastoAsociado = string.IsNullOrEmpty(idGastoForm) ? (int?)null : Convert.ToInt32(idGastoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
