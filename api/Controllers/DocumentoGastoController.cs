@@ -12,13 +12,9 @@ using WebApi;
 namespace WebApplication.Controllers
 {
     [EnableCors(origins: "http://localhost:5173", headers: "*", methods: "*")]
-    [RoutePrefix("api/DocumentoGasto")]
-    public class DocumentoGastoController : ApiController
+    [RoutePrefix("api/DocumentoIngreso")]
+    public class DocumentoIngresoController : ApiController
     {
-        /// <summary>
-        /// Resuelve la identidad del usuario a partir del token JWT analizando robustamente 
-        /// múltiples variantes de claims dentro del payload crudo.
-        /// </summary>
         private int? ResolverIdUsuarioDesdePeticion()
         {
             try
@@ -111,12 +107,12 @@ namespace WebApplication.Controllers
                         return Content(HttpStatusCode.Unauthorized, "El usuario asociado al token no se encuentra registrado.");
                     }
 
-                    var documentos = db.DocumentoGasto
+                    var documentos = db.DocumentoIngreso
                         .Where(d => d.IdUsuario == idUsuarioAutenticado.Value)
                         .Select(d => new
                         {
-                            d.IdDocumentoGasto,
-                            d.IdHistorialGasto, // <-- Corregido para que coincida con tu BD y tu Frontend
+                            d.IdDocumentoIngreso,
+                            d.IdIngreso,
                             d.NombreArchivoOriginal,
                             d.NombreArchivoFisico,
                             d.RutaArchivo,
@@ -162,18 +158,12 @@ namespace WebApplication.Controllers
                 }
 
                 var archivoFisico = httpRequest.Files[0];
-                
-                // 1. Leemos exactamente el nombre que manda React
-                var idHistorialGastoForm = httpRequest.Form["IdHistorialGasto"]; 
-                
-                // 2. Validamos que no venga vacío
-                if (string.IsNullOrEmpty(idHistorialGastoForm))
-                {
-                    return BadRequest("Falta el identificador del historial de gasto asociado.");
+                var idIngresoForm = httpRequest.Form["IdHistorialIngreso"];
+                if (string.IsNullOrEmpty(idIngresoForm))
+                    {
+                        return BadRequest("Falta el identificador del ingreso asociado.");
                 }
-                
-                // 3. Convertimos a entero de forma segura (sin duplicar variables)
-                int idHistorialGastoAsociado = Convert.ToInt32(idHistorialGastoForm);
+                int? idIngresoAsociado = string.IsNullOrEmpty(idIngresoForm) ? (int?)null : Convert.ToInt32(idIngresoForm);
 
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
@@ -201,10 +191,10 @@ namespace WebApplication.Controllers
 
                     archivoFisico.SaveAs(rutaFisicaCompleta);
 
-                    var nuevoDocumento = new DocumentoGasto
+                    var nuevoDocumento = new DocumentoIngreso
                     {
                         IdUsuario = usuario.IdUsuario,
-                        IdHistorialGasto = idHistorialGastoAsociado, // <-- Corregido para relacionarlo al Historial
+                        IdIngreso = (int)idIngresoAsociado,
                         NombreArchivoOriginal = archivoFisico.FileName,
                         NombreArchivoFisico = nombreFisicoUnico,
                         RutaArchivo = $"/Uploads/{nombreCarpetaUsuario}/{nombreFisicoUnico}",
@@ -214,7 +204,7 @@ namespace WebApplication.Controllers
                         FechaCarga = DateTime.Now
                     };
 
-                    db.DocumentoGasto.Add(nuevoDocumento);
+                    db.DocumentoIngreso.Add(nuevoDocumento);
                     db.SaveChanges();
 
                     return Ok(nuevoDocumento);
@@ -227,8 +217,8 @@ namespace WebApplication.Controllers
         }
 
         [HttpDelete]
-        [Route("Eliminar/{idDocumentoGasto:int}")]
-        public IHttpActionResult EliminarDocumento(int idDocumentoGasto)
+        [Route("Eliminar/{idDocumentoIngreso:int}")]
+        public IHttpActionResult EliminarDocumento(int idDocumentoIngreso)
         {
             int? idUsuarioAutenticado = ResolverIdUsuarioDesdePeticion();
             if (!idUsuarioAutenticado.HasValue)
@@ -241,8 +231,8 @@ namespace WebApplication.Controllers
                 using (FinanzasDBEntities db = new FinanzasDBEntities())
                 {
                     // Buscar el documento asegurando que pertenezca al usuario
-                    var documento = db.DocumentoGasto.FirstOrDefault(d =>
-                        d.IdDocumentoGasto == idDocumentoGasto &&
+                    var documento = db.DocumentoIngreso.FirstOrDefault(d =>
+                        d.IdDocumentoIngreso == idDocumentoIngreso &&
                         d.IdUsuario == idUsuarioAutenticado.Value);
 
                     if (documento == null)
@@ -260,10 +250,10 @@ namespace WebApplication.Controllers
                     }
 
                     // Eliminar el registro de la BD
-                    db.DocumentoGasto.Remove(documento);
+                    db.DocumentoIngreso.Remove(documento);
                     db.SaveChanges();
 
-                    return Ok(new { mensaje = "Documento de gasto eliminado correctamente." });
+                    return Ok(new { mensaje = "Documento de ingreso eliminado correctamente." });
                 }
             }
             catch (Exception ex)

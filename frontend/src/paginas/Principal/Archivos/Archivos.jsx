@@ -388,7 +388,7 @@ const Archivos = () => {
       {modalAbierto && (
         <div className="capa-modal-documentos">
           <div className="contenido-modal-documentos">
-            <h3>Cargar Comprobante Financiero</h3>
+            <h3>Cargar Comprobante Financiero 1</h3>
             <form onSubmit={ejecutarSubidaArchivo}>
               <div className="formulario-grupo">
                 <label>Tipo de Comprobante</label>
@@ -403,7 +403,7 @@ const Archivos = () => {
                   <option value="">-- Seleccione --</option>
                   {cargandoTransacciones && <option value="">Cargando movimientos...</option>}
                   {!cargandoTransacciones && (tipoSubida === "ingreso" ? historialIngresos : historialGastos).map((item) => {
-                    const id = tipoSubida === "ingreso" ? item.IdHistorialIngreso : item.IdHistorialGasto;
+                    const id = tipoSubida === "ingreso" ? item.IdIngreso : item.IdGasto;
                     const monto = item.Monto;
                     const fecha = item.Fecha;
                     return (
