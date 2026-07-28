@@ -77,13 +77,13 @@ namespace WebApplication.Controllers
                     if (ingresoOriginal == null) 
                         return NotFound();
 
-                    var nuevoHistorial = new HistorialGasto
+                    var nuevoHistorial = new HistorialIngreso
                     {
                         IdUsuario = ingresoOriginal.IdUsuario,
                         IdTipoIngreso = ingresoOriginal.IdTipoIngreso, 
                         IdDivisa = ingresoOriginal.IdDivisa,
-                        MontoIngreso = ingresoOriginal.MontoIngreso,        
-                        FechaIngreso = ingresoOriginal.FechaIngreso,        
+                        Monto = ingresoOriginal.MontoIngreso,        
+                        Fecha = ingresoOriginal.FechaIngreso,        
                         FechaDeGuardado = DateTime.Now,
                         Descripcion = ingresoOriginal.Descripcion 
                     };
