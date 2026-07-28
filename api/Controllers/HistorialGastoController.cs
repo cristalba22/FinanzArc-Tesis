@@ -36,6 +36,7 @@ namespace WebApplication.Controllers
         {
             return Ok(db.HistorialGasto.ToList());
         }
+
         [HttpGet]
         [Route("ByUsuario/BetweenDates")]
         public IHttpActionResult GetByUsuarioBetweenDates(int idUsuario, DateTime start, DateTime end)
@@ -58,6 +59,57 @@ namespace WebApplication.Controllers
                 return InternalServerError(ex);
             }
         }
+
+        // ---------------------------------------------------------
+        // NUEVO ENDPOINT: ARCHIVAR UN GASTO INDIVIDUAL
+        // POST: api/HistorialGasto/Archivar/5
+        // ---------------------------------------------------------
+        [HttpPost]
+        [Route("Archivar/{id}")]
+        public IHttpActionResult Archivar(int id)
+        {
+            // Iniciamos una transacción para garantizar que no se pierdan datos si algo falla
+            using (var dbContextTransaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    // 1. Buscar el gasto vivo en la base de datos
+                    var gastoOriginal = db.Gasto.Find(id);
+                    
+                    if (gastoOriginal == null) 
+                        return NotFound();
+
+                    // 2. Mapear los datos a la entidad histórica
+                    var nuevoHistorial = new HistorialGasto
+                    {
+                        IdUsuario = gastoOriginal.IdUsuario,
+                        Idcategoria = gastoOriginal.IdCategoria, 
+                        Monto = gastoOriginal.MontoGasto,        
+                        IdDivisa = gastoOriginal.IdDivisa,
+                        Fecha = gastoOriginal.FechaGasto,        
+                        FechaDeGuardado = DateTime.Now,
+                        Descripcion = gastoOriginal.Descripcion 
+                    };
+
+                    // 3. Guardar en el historial y eliminar el original en la misma operación
+                    db.HistorialGasto.Add(nuevoHistorial);
+                    db.Gasto.Remove(gastoOriginal);
+
+                    // 4. Confirmar cambios
+                    db.SaveChanges();
+                    dbContextTransaction.Commit();
+
+                    return Ok(new { mensaje = "Gasto archivado y eliminado exitosamente." });
+                }
+                catch (Exception ex)
+                {
+                    // Si algo falla, revertimos los cambios (el gasto original se mantiene a salvo)
+                    dbContextTransaction.Rollback();
+                    return InternalServerError(ex);
+                }
+            }
+        }
+
         // DELETE: api/HistorialGasto/5
         [HttpDelete]
         public IHttpActionResult Delete(int id)

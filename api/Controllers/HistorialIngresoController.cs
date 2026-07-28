@@ -61,6 +61,50 @@ namespace WebApplication.Controllers
             }
         }
 
+
+        // POST: api/HistorialGasto/Archivar/5
+        
+        [HttpPost]
+        [Route("Archivar/{id}")]
+        public IHttpActionResult Archivar(int id)
+        {
+            using (var dbContextTransaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var ingresoOriginal = db.Ingreso.Find(id);
+                    
+                    if (ingresoOriginal == null) 
+                        return NotFound();
+
+                    var nuevoHistorial = new HistorialGasto
+                    {
+                        IdUsuario = ingresoOriginal.IdUsuario,
+                        IdTipoIngreso = ingresoOriginal.IdTipoIngreso, 
+                        IdDivisa = ingresoOriginal.IdDivisa,
+                        MontoIngreso = ingresoOriginal.MontoIngreso,        
+                        FechaIngreso = ingresoOriginal.FechaIngreso,        
+                        FechaDeGuardado = DateTime.Now,
+                        Descripcion = ingresoOriginal.Descripcion 
+                    };
+
+                    db.HistorialIngreso.Add(nuevoHistorial);
+                    db.Ingreso.Remove(ingresoOriginal);
+
+                    db.SaveChanges();
+                    dbContextTransaction.Commit();
+
+                    return Ok(new { mensaje = "Ingreso archivado y eliminado exitosamente." });
+                }
+                catch (Exception ex)
+                {
+                    dbContextTransaction.Rollback();
+                    return InternalServerError(ex);
+                }
+            }
+        }
+
+
         // DELETE: api/HistorialIngreso/5
         [HttpDelete]
         public IHttpActionResult Delete(int id)

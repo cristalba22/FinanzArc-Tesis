@@ -96,6 +96,26 @@ function Gasto() {
     fetch(`${API_BASE_URL}/Gasto/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${localStorage.getItem("Token")}` } })
       .then(() => obtenerDatosUsuarioYRegistros());
   };
+ const archivarGasto = (id) => {
+    if (!window.confirm("¿Estás seguro de que deseas archivar este gasto?")) return;
+    
+    // Apuntamos al nuevo endpoint que recibe el ID en la URL
+    fetch(`${API_BASE_URL}/HistorialGasto/Archivar/${id}`, { 
+      method: "POST", 
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("Token")}` 
+      } 
+    })
+    .then(res => {
+      if (res.ok) {
+        obtenerDatosUsuarioYRegistros(); // Actualiza la tabla si todo sale bien
+      } else {
+        console.error("Error al intentar archivar el gasto.");
+      }
+    })
+    .catch(err => console.error("Error de red:", err)); 
+  };
 
   const calcularMontoEnPesos = (monto, idDivisa) => {
     const tasaUSD = tasas?.USD || 1450;
@@ -257,6 +277,7 @@ function Gasto() {
                       <td>
                         <button className="btn-icon" onClick={() => prepararEdicion(item)}>✏️</button>
                         <button className="btn-icon" onClick={() => eliminarGasto(item.IdGasto)}>🗑️</button>
+                          <button className="btn-icon" onClick={() => archivarGasto(item.IdGasto)}>📂</button>
                         <button className="btn-icon" onClick={() => { setItemSeleccionado(item); setVerMas(true); }}>📊</button>
                       </td>
                     </tr>

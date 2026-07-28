@@ -144,6 +144,27 @@ function Ingreso() {
     }).then(() => obtenerDatosUsuarioYRegistros());
   };
 
+  const archivarIngreso = (id) => {
+    if (!window.confirm("¿Estás seguro de que deseas archivar este ingreso?")) return;
+    
+    // Apuntamos al nuevo endpoint que recibe el ID en la URL
+    fetch(`${API_BASE_URL}/HistorialIngreso/Archivar/${id}`, { 
+      method: "POST", 
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("Token")}` 
+      } 
+    })
+    .then(res => {
+      if (res.ok) {
+        obtenerDatosUsuarioYRegistros(); // Actualiza la tabla si todo sale bien
+      } else {
+        console.error("Error al intentar archivar el ingreso.");
+      }
+    })
+    .catch(err => console.error("Error de red:", err)); 
+  };
+
   const calcularMontoEnPesos = (monto, idDivisa) => {
     const tasaUSD = tasas?.USD || 1450;
     const tasaEUR = tasas?.EUR || 1650;
@@ -329,6 +350,7 @@ function Ingreso() {
                       <td>
                         <button className="btn-icon" onClick={() => prepararEdicion(item)}>✏️</button>
                         <button className="btn-icon" onClick={() => eliminarIngreso(item.IdIngreso)}>🗑️</button>
+                        <button className="btn-icon" onClick={() => archivarIngreso(item.IdIngreso)}>📂</button>
                         <button className="btn-icon" onClick={() => { setItemSeleccionado(item); setVerMas(true); }}>📊</button>
                       </td>
                     </tr>
