@@ -128,12 +128,14 @@ function Ingreso() {
       });
 
       if (res.ok) {
+         toast.success("Accion completada correctamente!")
         setModalAbierto(false);
         resetearForm();
         obtenerDatosUsuarioYRegistros();
       }
     } catch (err) {
       console.error("Error al guardar ingreso", err);
+      toast.error("Error al editar ingreso!")
     }
   };
 
@@ -142,8 +144,11 @@ function Ingreso() {
     fetch(`${API_BASE_URL}/Ingreso/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${localStorage.getItem("Token")}` }
-    }).then(() => obtenerDatosUsuarioYRegistros());
+    }).then(() => 
+    toast.success("Ingreso eliminado correctamente"),  
+    obtenerDatosUsuarioYRegistros());
   };
+
 
   const archivarIngreso = (id) => {
     if (!window.confirm("¿Estás seguro de que deseas archivar este ingreso?")) return;

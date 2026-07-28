@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "react-toastify";
 
 import "./Gasto.css";
 import { obtenerTasas } from "../../../apiConfig";
@@ -89,12 +90,15 @@ function Gasto() {
     setModalAbierto(false);
     resetearForm();
     obtenerDatosUsuarioYRegistros();
+    toast.success("Accion completada correctamente!")
   };
 
   const eliminarGasto = (id) => {
     if (!window.confirm("¿Estás seguro?")) return;
     fetch(`${API_BASE_URL}/Gasto/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${localStorage.getItem("Token")}` } })
-      .then(() => obtenerDatosUsuarioYRegistros());
+      .then(() =>
+        toast.success("Gasto eliminado correctamente!")
+        , obtenerDatosUsuarioYRegistros());
   };
   const archivarGasto = (id) => {
     if (!window.confirm("¿Estás seguro de que deseas archivar este gasto?")) return;
