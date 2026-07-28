@@ -96,25 +96,26 @@ function Gasto() {
     fetch(`${API_BASE_URL}/Gasto/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${localStorage.getItem("Token")}` } })
       .then(() => obtenerDatosUsuarioYRegistros());
   };
- const archivarGasto = (id) => {
+  const archivarGasto = (id) => {
     if (!window.confirm("¿Estás seguro de que deseas archivar este gasto?")) return;
-    
+
     // Apuntamos al nuevo endpoint que recibe el ID en la URL
-    fetch(`${API_BASE_URL}/HistorialGasto/Archivar/${id}`, { 
-      method: "POST", 
-      headers: { 
+    fetch(`${API_BASE_URL}/HistorialGasto/Archivar/${id}`, {
+      method: "POST",
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("Token")}` 
-      } 
-    })
-    .then(res => {
-      if (res.ok) {
-        obtenerDatosUsuarioYRegistros(); // Actualiza la tabla si todo sale bien
-      } else {
-        console.error("Error al intentar archivar el gasto.");
+        "Authorization": `Bearer ${localStorage.getItem("Token")}`
       }
     })
-    .catch(err => console.error("Error de red:", err)); 
+      .then(res => {
+        if (res.ok) {
+          obtenerDatosUsuarioYRegistros(); // Actualiza la tabla si todo sale bien
+          toast.success("Gasto archivado correctamente!")
+        } else {
+          toast.error("Error al intentar gasto el ingreso.");
+        }
+      })
+      .catch(err => console.error("Error de red:", err));
   };
 
   const calcularMontoEnPesos = (monto, idDivisa) => {
@@ -123,8 +124,8 @@ function Gasto() {
 
     let total = monto;
     if (idDivisa === 2) total = monto * tasaUSD;
-    if (idDivisa === 3) total = monto * tasaEUR; 
-    
+    if (idDivisa === 3) total = monto * tasaEUR;
+
     // Si la divisa es USD (2) o EUR (3), cortamos a 1 decimal redondeando hacia arriba
     if (idDivisa === 2 || idDivisa === 3) {
       return Math.ceil(total * 10) / 10;
@@ -135,12 +136,12 @@ function Gasto() {
 
   const FormatearMoneda = (monto, idDivisa) => {
     const totalPesos = calcularMontoEnPesos(monto, idDivisa);
-    
+
     // Agregamos 'es-AR' para asegurar el formato correcto de puntos y comas
     if (idDivisa === 1) return `$${monto.toLocaleString('es-AR')}`;
-    
+
     const simbolo = idDivisa === 2 ? "USD" : "EUR";
-    
+
     return (
       <div style={{ display: "flex", flexDirection: "column" }}>
         <span>{simbolo} {monto.toLocaleString('es-AR')}</span>
@@ -177,14 +178,14 @@ function Gasto() {
 
       <div className="encabezado-simple">
         <h1 className="titulo-seccion">Control de Gastos</h1>
-        <p className="texto-gris"> 
+        <p className="texto-gris">
           Administre todos sus gastos en este apartado. El mismo es de carácter histórico y acumulado; para más detalles de sus gastos, clickee en los íconos del apartado "ACCIONES".
           <strong>
-            <br /> 
-            Cotizaciones: 
-            1 USD = ${ (Math.ceil((tasas?.USD || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) } | 
-            1 EUR = ${ (Math.ceil((tasas?.EUR || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }
-          </strong> 
+            <br />
+            Cotizaciones:
+            1 USD = ${(Math.ceil((tasas?.USD || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} |
+            1 EUR = ${(Math.ceil((tasas?.EUR || 0) * 10) / 10).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+          </strong>
         </p>
       </div>
 
@@ -234,7 +235,7 @@ function Gasto() {
                     border: "1px solid rgba(200, 178, 119, 0.3)",
                     borderRadius: "8px"
                   }}
-                  itemStyle={{ fontWeight: "500"}}
+                  itemStyle={{ fontWeight: "500" }}
                   formatter={(value, name) => [`$${formatMontoParaInput(value)}`, name]}
                 />
 
@@ -277,7 +278,7 @@ function Gasto() {
                       <td>
                         <button className="btn-icon" onClick={() => prepararEdicion(item)}>✏️</button>
                         <button className="btn-icon" onClick={() => eliminarGasto(item.IdGasto)}>🗑️</button>
-                          <button className="btn-icon" onClick={() => archivarGasto(item.IdGasto)}>📂</button>
+                        <button className="btn-icon" onClick={() => archivarGasto(item.IdGasto)}>📂</button>
                         <button className="btn-icon" onClick={() => { setItemSeleccionado(item); setVerMas(true); }}>📊</button>
                       </td>
                     </tr>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import DatePicker, { registerLocale } from "react-datepicker";
+import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
 import "./Ingreso.css";
@@ -158,8 +159,9 @@ function Ingreso() {
     .then(res => {
       if (res.ok) {
         obtenerDatosUsuarioYRegistros(); // Actualiza la tabla si todo sale bien
+        toast.success("Ingreso archivado correctamente!")
       } else {
-        console.error("Error al intentar archivar el ingreso.");
+        toast.error("Error al intentar archivar el ingreso.");
       }
     })
     .catch(err => console.error("Error de red:", err)); 
