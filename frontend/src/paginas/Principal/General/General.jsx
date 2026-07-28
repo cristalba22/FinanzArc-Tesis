@@ -20,7 +20,7 @@ const API_ENDPOINTS = {
   usuarios: "/Usuarios",
   ahorros: "/MetaAhorro",
   transacciones: "/Transacciones",
-  // Endpoints inferidos para el historial
+  cierre: "/Cierre/FinalizarMes",
   historialIngresos: "/HistorialIngreso",
   historialGastos: "/HistorialGasto"
 };
@@ -33,15 +33,12 @@ const GastoIngreso = () => {
   const [datosIngresos, setDatosIngresos] = useState([]);
   const [metasAhorro, setMetasAhorro] = useState([]);
 
-  // NUEVO: Estados para conservar los registros completos de la API
+  // Estados para conservar los registros completos de la API
   const [datosGastosCompletos, setDatosGastosCompletos] = useState([]);
   const [datosIngresosCompletos, setDatosIngresosCompletos] = useState([]);
 
-  // NUEVO: Estados para selección y flujo de archivado
-  const [tipoArchivo, setTipoArchivo] = useState("ingresos"); // "ingresos" | "gastos"
-  const [ingresosSeleccionados, setIngresosSeleccionados] = useState([]); // Arreglo de IDs
-  const [gastosSeleccionados, setGastosSeleccionados] = useState([]); // Arreglo de IDs
-  const [estadoModalArchivar, setEstadoModalArchivar] = useState("seleccion"); // "seleccion" | "confirmacion"
+  // Estados para el flujo del modal de archivado
+  const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
   const [archivando, setArchivando] = useState(false);
 
   const [idUsuarioActual, setIdUsuarioActual] = useState(null);
@@ -91,7 +88,6 @@ const GastoIngreso = () => {
 
   const [modalAgregarAbierto, setModalAgregarAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
-  const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
 
   const [metaForm, setMetaForm] = useState({
     IdMetaAhorro: null,
@@ -161,7 +157,7 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosGastosCompletos(data); // Conservamos registros íntegros
+        setDatosGastosCompletos(data);
         const gastosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin descripción",
           valor: convertirAPesos(item.MontoGasto, item.IdDivisa, cotizacionesData),
@@ -181,7 +177,7 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosIngresosCompletos(data); // Conservamos registros íntegros
+        setDatosIngresosCompletos(data);
         const ingresosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin Descripción",
           valor: convertirAPesos(item.MontoIngreso, item.IdDivisa, cotizacionesData),
@@ -448,156 +444,41 @@ const GastoIngreso = () => {
     setModalEditarAbierto(true);
   };
 
-  // NUEVAS FUNCIONES DE ARCHIVADO SELECTIVO
-
-  const abrirModalArchivar = () => {
-    setIngresosSeleccionados([]);
-    setGastosSeleccionados([]);
-    setEstadoModalArchivar("seleccion");
-    setTipoArchivo("ingresos");
-    setModalArchivarAbierto(true);
-  };
-
-  const toggleSeleccion = (tipo, id) => {
-    if (tipo === "ingresos") {
-      setIngresosSeleccionados(prev =>
-        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-      );
-    } else {
-      setGastosSeleccionados(prev =>
-        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-      );
-    }
-  };
-
-  const procederAConfirmacion = () => {
-    if (ingresosSeleccionados.length === 0 && gastosSeleccionados.length === 0) {
-      toast.warning("Seleccioná al menos un ingreso o gasto para archivar.");
-      return;
-    }
-    setEstadoModalArchivar("confirmacion");
-  };
-
+  // FUNCIÓN DE ARCHIVADO USANDO EL CONTROLADOR DE CIERRE EXISTENTE EN LA API
   const ejecutarArchivado = async () => {
     if (!idUsuarioActual) {
-      toast.error("No se puede realizar el archivado porque no se identificó al usuario.");
+      toast.error("No se pudo identificar al usuario actual.");
       return;
     }
 
     setArchivando(true);
-    let erroresTotales = 0;
-    let totalExitosos = 0;
     const token = localStorage.getItem("Token");
 
-    // Procesamiento Secuencial Seguro para Ingresos
-    for (const id of ingresosSeleccionados) {
-      // Usamos IdIngreso si existe, de lo contrario fallback a id (dependiendo de la estructura API real)
-      const registroOriginal = datosIngresosCompletos.find(r => r.IdIngreso === id || r.id === id);
-      
-      if (!registroOriginal) continue;
-      
-      // Validación extra: Pertenece al usuario actual?
-      if (registroOriginal.IdUsuario && registroOriginal.IdUsuario !== idUsuarioActual) {
-        console.error("Intento de archivar un registro que no pertenece al usuario.");
-        erroresTotales++;
-        continue;
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.cierre}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ IdUsuario: idUsuarioActual })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.mensaje || "Error al procesar el cierre.");
       }
 
-      try {
-        // 1. POST HistorialIngreso (Se envía el objeto original completo para no perder datos)
-        const resPost = await fetch(`${API_BASE_URL}${API_ENDPOINTS.historialIngresos}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(registroOriginal)
-        });
-
-        if (!resPost.ok) {
-          throw new Error(`Error al crear historial para ingreso ID ${id}`);
-        }
-
-        // 2. DELETE Ingreso Original (Solo se ejecuta si el POST fue exitoso)
-        const resDelete = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ingresos}/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (!resDelete.ok) {
-          throw new Error(`Error al eliminar el ingreso original ID ${id} tras guardarlo en historial`);
-        }
-
-        totalExitosos++;
-      } catch (error) {
-        console.error(error);
-        erroresTotales++;
-      }
+      toast.success(data.mensaje || "¡Datos archivados y tablas limpias correctamente!");
+      setModalArchivarAbierto(false);
+      obtenerDatos(cotizaciones);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Error al realizar el archivado.");
+    } finally {
+      setArchivando(false);
     }
-
-    // Procesamiento Secuencial Seguro para Gastos
-    for (const id of gastosSeleccionados) {
-      const registroOriginal = datosGastosCompletos.find(r => r.IdGasto === id || r.id === id);
-      
-      if (!registroOriginal) continue;
-
-      if (registroOriginal.IdUsuario && registroOriginal.IdUsuario !== idUsuarioActual) {
-        console.error("Intento de archivar un registro que no pertenece al usuario.");
-        erroresTotales++;
-        continue;
-      }
-
-      try {
-        // 1. POST HistorialGasto
-        const resPost = await fetch(`${API_BASE_URL}${API_ENDPOINTS.historialGastos}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(registroOriginal)
-        });
-
-        if (!resPost.ok) {
-          throw new Error(`Error al crear historial para gasto ID ${id}`);
-        }
-
-        // 2. DELETE Gasto Original
-        const resDelete = await fetch(`${API_BASE_URL}${API_ENDPOINTS.gastos}/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (!resDelete.ok) {
-          throw new Error(`Error al eliminar el gasto original ID ${id} tras guardarlo en historial`);
-        }
-
-        totalExitosos++;
-      } catch (error) {
-        console.error(error);
-        erroresTotales++;
-      }
-    }
-
-    setArchivando(false);
-
-    // Feedback final
-    if (erroresTotales > 0) {
-      toast.warning(`Se completó con ${erroresTotales} error(es). Revisa la consola. Registros archivados: ${totalExitosos}`);
-    } else if (totalExitosos > 0) {
-      toast.success(`¡Archivado correctamente! (${totalExitosos} registros movidos)`);
-    }
-
-    // Limpieza de estado y actualización visual
-    setModalArchivarAbierto(false);
-    setIngresosSeleccionados([]);
-    setGastosSeleccionados([]);
-    setEstadoModalArchivar("seleccion");
-    obtenerDatos(cotizaciones); // Vuelve a fetchear los datos desde 0
   };
 
   const nombre = localStorage.getItem("Nombre") || "Usuario";
@@ -639,18 +520,17 @@ const GastoIngreso = () => {
             }}
             onClick={() => {
               if (tienePermisoArchivar) {
-                abrirModalArchivar();
+                setModalArchivarAbierto(true);
               } else {
-                toast.warning("Función Premium: Necesitas mejorar tu cuenta (Plan Gold o Platino) para poder archivar todos tu ingreso y gasto historico. 🚀");
+                toast.warning("Función Premium: Necesitas mejorar tu cuenta (Plan Gold o Platino) para poder archivar tu histórico. 🚀");
               }
             }}
             className='botonesComparativa btn-secundario'
-            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar movimientos seleccionados"}
+            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar movimientos"}
           >
             Archivar Historico
           </button>
         </div>
-        
       </div>
 
       <div className="panel-graficos-general">
@@ -849,6 +729,7 @@ const GastoIngreso = () => {
         )}
 
       </div>
+
       {modalEditarAbierto && (
         <div className="capa-modal" onClick={() => setModalEditarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -968,6 +849,7 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
+
       {modalAgregarAbierto && (
         <div className="capa-modal" onClick={() => setModalAgregarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -1066,129 +948,41 @@ const GastoIngreso = () => {
         </div>
       )}
 
-      {/* NUEVO MODAL DE ARCHIVADO SELECTIVO */}
+      {/* MODAL DE CONFIRMACIÓN DE ARCHIVADO (CONECTADO AL ENDPOINT DE CIERRE DE LA API) */}
       {modalArchivarAbierto && (
         <div className="modal-overlay" onClick={() => !archivando && setModalArchivarAbierto(false)}>
           <div className="modal-contenido" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Archivar Histórico Selectivo</h3>
+              <h3>Archivar Histórico / Cierre</h3>
               <button className="btn-cerrar" onClick={() => !archivando && setModalArchivarAbierto(false)} disabled={archivando}>&times;</button>
             </div>
 
-            {estadoModalArchivar === "seleccion" && (
-              <div className="modal-body-general">
-                <div className="selector-tipo-archivo">
-                  <label>Tipo de movimiento:</label>
-                  <select 
-                    value={tipoArchivo} 
-                    onChange={(e) => setTipoArchivo(e.target.value)}
-                    className="select-custom-premium"
-                  >
-                    <option value="ingresos">Ingresos</option>
-                    <option value="gastos">Gastos</option>
-                  </select>
-                </div>
-
-                <div className="modal-lista-registros">
-                  {tipoArchivo === "ingresos" && (
-                    datosIngresosCompletos.length === 0 ? (
-                      <p className="registro-vacio">No tienes ingresos disponibles.</p>
-                    ) : (
-                      datosIngresosCompletos.map(item => {
-                        const itemId = item.IdIngreso || item.id;
-                        const isChecked = ingresosSeleccionados.includes(itemId);
-                        return (
-                          <div key={itemId} className={`registro-item ${isChecked ? 'seleccionado' : ''}`} onClick={() => toggleSeleccion("ingresos", itemId)}>
-                            <div className="registro-check">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked} 
-                                onChange={() => {}} // Manejado por el onClick del contenedor
-                              />
-                            </div>
-                            <div className="registro-info">
-                              <span className="registro-desc">{item.Descripcion || "Sin Descripción"} (ID: {itemId})</span>
-                              <span className="registro-monto">${Number(item.MontoIngreso || 0).toLocaleString("es-AR")}</span>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )
-                  )}
-
-                  {tipoArchivo === "gastos" && (
-                    datosGastosCompletos.length === 0 ? (
-                      <p className="registro-vacio">No tienes gastos disponibles.</p>
-                    ) : (
-                      datosGastosCompletos.map(item => {
-                        const itemId = item.IdGasto || item.id;
-                        const isChecked = gastosSeleccionados.includes(itemId);
-                        return (
-                          <div key={itemId} className={`registro-item ${isChecked ? 'seleccionado' : ''}`} onClick={() => toggleSeleccion("gastos", itemId)}>
-                            <div className="registro-check">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked} 
-                                onChange={() => {}} // Manejado por el onClick del contenedor
-                              />
-                            </div>
-                            <div className="registro-info">
-                              <span className="registro-desc">{item.Descripcion || "Sin Descripción"} (ID: {itemId})</span>
-                              <span className="registro-monto">${Number(item.MontoGasto || 0).toLocaleString("es-AR")}</span>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )
-                  )}
-                </div>
-
-                <div className="registro-resumen-footer">
-                  <span>Seleccionados: {ingresosSeleccionados.length} ingresos / {gastosSeleccionados.length} gastos</span>
-                </div>
-
-                <div className="modal-acciones">
-                  <button className="btn-Cancelar-General" onClick={() => setModalArchivarAbierto(false)}>Cancelar</button>
-                  <button className="btn-Confirmar-General" onClick={procederAConfirmacion}>Archivar seleccionados</button>
-                </div>
+            <div className="modal-body-general">
+              <div className="confirmacion-caja">
+                <p>Estás a punto de procesar el archivo y cierre de tus registros activos actuales.</p>
+                <p className="warning-text" style={{ marginTop: '10px' }}>
+                  Esta acción moverá todos tus ingresos y gastos actuales al historial correspondiente y limpiará las tablas activas. ¿Deseas continuar?
+                </p>
               </div>
-            )}
 
-            {estadoModalArchivar === "confirmacion" && (
-              <div className="modal-body-general">
-                <h3 style={{ textAlign: 'center', color: '#c8b277' }}>Confirmación de Archivado</h3>
-                
-                <div className="confirmacion-caja">
-                  <p>Vas a archivar:</p>
-                  <ul>
-                    <li><strong>Ingresos:</strong> {ingresosSeleccionados.length}</li>
-                    <li><strong>Gastos:</strong> {gastosSeleccionados.length}</li>
-                  </ul>
-                  <hr style={{ borderColor: 'rgba(200, 178, 119, 0.2)' }} />
-                  <p><strong>Total:</strong> {ingresosSeleccionados.length + gastosSeleccionados.length} registros</p>
-                  
-                  <p className="warning-text">Esta acción copiará los registros seleccionados a la tabla histórica y los eliminará de los registros activos originales. ¿Deseas continuar?</p>
-                </div>
-
-                <div className="modal-acciones">
-                  <button 
-                    className="btn-Cancelar-General" 
-                    onClick={() => setEstadoModalArchivar("seleccion")}
-                    disabled={archivando}
-                  >
-                    Volver
-                  </button>
-                  <button 
-                    className="btn-Confirmar-General" 
-                    onClick={ejecutarArchivado}
-                    disabled={archivando}
-                    style={{ opacity: archivando ? 0.7 : 1 }}
-                  >
-                    {archivando ? "Procesando..." : "Confirmar archivado"}
-                  </button>
-                </div>
+              <div className="modal-acciones" style={{ marginTop: '20px' }}>
+                <button 
+                  className="btn-Cancelar-General" 
+                  onClick={() => setModalArchivarAbierto(false)}
+                  disabled={archivando}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className="btn-Confirmar-General" 
+                  onClick={ejecutarArchivado}
+                  disabled={archivando}
+                  style={{ opacity: archivando ? 0.7 : 1 }}
+                >
+                  {archivando ? "Procesando..." : "Confirmar archivado"}
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
