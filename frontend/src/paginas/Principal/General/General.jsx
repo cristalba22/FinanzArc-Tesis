@@ -19,30 +19,16 @@ const API_ENDPOINTS = {
   ingresos: "/Ingreso",
   usuarios: "/Usuarios",
   ahorros: "/MetaAhorro",
-  transacciones: "/Transacciones",
-  // Endpoints inferidos para el historial
-  historialIngresos: "/HistorialIngreso",
-  historialGastos: "/HistorialGasto"
+  transacciones: "/Transacciones"
 };
+
 
 const GastoIngreso = () => {
   const [mostrarSaludo, setMostrarSaludo] = useState(true);
 
-  // Estados para gráficos (transformados)
   const [datosGastos, setDatosGastos] = useState([]);
   const [datosIngresos, setDatosIngresos] = useState([]);
   const [metasAhorro, setMetasAhorro] = useState([]);
-
-  // NUEVO: Estados para conservar los registros completos de la API
-  const [datosGastosCompletos, setDatosGastosCompletos] = useState([]);
-  const [datosIngresosCompletos, setDatosIngresosCompletos] = useState([]);
-
-  // NUEVO: Estados para selección y flujo de archivado
-  const [tipoArchivo, setTipoArchivo] = useState("ingresos"); // "ingresos" | "gastos"
-  const [ingresosSeleccionados, setIngresosSeleccionados] = useState([]); // Arreglo de IDs
-  const [gastosSeleccionados, setGastosSeleccionados] = useState([]); // Arreglo de IDs
-  const [estadoModalArchivar, setEstadoModalArchivar] = useState("seleccion"); // "seleccion" | "confirmacion"
-  const [archivando, setArchivando] = useState(false);
 
   const [idUsuarioActual, setIdUsuarioActual] = useState(null);
 
@@ -78,7 +64,6 @@ const GastoIngreso = () => {
       return respaldo;
     }
   };
-
   const formatMontoParaInput = (val) => {
     if (val === "" || val === null || val === undefined) return "";
     const stringVal = val.toString();
@@ -88,7 +73,6 @@ const GastoIngreso = () => {
       ? parts[0] + "," + parts[1]
       : (stringVal.endsWith(".") ? parts[0] + "," : parts[0]);
   };
-
   const [modalAgregarAbierto, setModalAgregarAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
   const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
@@ -161,15 +145,13 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosGastosCompletos(data); // Conservamos registros íntegros
         const gastosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin descripción",
           valor: convertirAPesos(item.MontoGasto, item.IdDivisa, cotizacionesData),
           monedaOriginal: Number(item.IdDivisa) === 2 ? "USD" : Number(item.IdDivisa) === 3 ? "EUR" : "ARS"
         }));
         setDatosGastos(gastosProcesados);
-      })
-      .catch(err => console.error("Error al obtener gastos:", err));
+      });
   };
 
   const obtenerIngresos = (idusuario, cotizacionesData) => {
@@ -181,15 +163,13 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosIngresosCompletos(data); // Conservamos registros íntegros
         const ingresosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin Descripción",
           valor: convertirAPesos(item.MontoIngreso, item.IdDivisa, cotizacionesData),
           monedaOriginal: Number(item.IdDivisa) === 2 ? "USD" : Number(item.IdDivisa) === 3 ? "EUR" : "ARS"
         }));
         setDatosIngresos(ingresosProcesados);
-      })
-      .catch(err => console.error("Error al obtener ingresos:", err));
+      });
   };
 
   const obtenerAhorros = (idusuario, cotizacionesData) => {
@@ -208,8 +188,7 @@ const GastoIngreso = () => {
           objetivo: convertirAPesos(item.MontoObjetivo, item.IdDivisa, cotizacionesData)
         }));
         setMetasAhorro(metasProcesadas);
-      })
-      .catch(err => console.error("Error al obtener ahorros:", err));
+      });
   };
 
   const obtenerLimiteMetas = (idRol) => {
@@ -220,6 +199,16 @@ const GastoIngreso = () => {
       case 4: return Infinity;
       default: return 1;
     }
+  };
+
+  const getNombreMes = (offset = 0) => {
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const fecha = new Date();
+    fecha.setMonth(fecha.getMonth() + offset);
+    return meses[fecha.getMonth()];
   };
 
   const metasActivas = metasAhorro.filter(meta => meta.IdEstadoMetaAhorro !== 2);
@@ -343,7 +332,7 @@ const GastoIngreso = () => {
         toast.success("Meta eliminada correctamente");
 
         setModalEditarAbierto(false);
-        obtenerDatos(cotizaciones);
+        obtenerDatos();
       })
       .catch(error => {
         console.error(error);
@@ -448,156 +437,39 @@ const GastoIngreso = () => {
     setModalEditarAbierto(true);
   };
 
-  // NUEVAS FUNCIONES DE ARCHIVADO SELECTIVO
-
-  const abrirModalArchivar = () => {
-    setIngresosSeleccionados([]);
-    setGastosSeleccionados([]);
-    setEstadoModalArchivar("seleccion");
-    setTipoArchivo("ingresos");
-    setModalArchivarAbierto(true);
-  };
-
-  const toggleSeleccion = (tipo, id) => {
-    if (tipo === "ingresos") {
-      setIngresosSeleccionados(prev =>
-        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-      );
-    } else {
-      setGastosSeleccionados(prev =>
-        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-      );
-    }
-  };
-
-  const procederAConfirmacion = () => {
-    if (ingresosSeleccionados.length === 0 && gastosSeleccionados.length === 0) {
-      toast.warning("Seleccioná al menos un ingreso o gasto para archivar.");
-      return;
-    }
-    setEstadoModalArchivar("confirmacion");
-  };
-
-  const ejecutarArchivado = async () => {
+  const archivarMesActual = async () => {
     if (!idUsuarioActual) {
-      toast.error("No se puede realizar el archivado porque no se identificó al usuario.");
+      toast.warning("No se encontró un usuario válido para realizar la acción.");
       return;
     }
-
-    setArchivando(true);
-    let erroresTotales = 0;
-    let totalExitosos = 0;
-    const token = localStorage.getItem("Token");
-
-    // Procesamiento Secuencial Seguro para Ingresos
-    for (const id of ingresosSeleccionados) {
-      // Usamos IdIngreso si existe, de lo contrario fallback a id (dependiendo de la estructura API real)
-      const registroOriginal = datosIngresosCompletos.find(r => r.IdIngreso === id || r.id === id);
-      
-      if (!registroOriginal) continue;
-      
-      // Validación extra: Pertenece al usuario actual?
-      if (registroOriginal.IdUsuario && registroOriginal.IdUsuario !== idUsuarioActual) {
-        console.error("Intento de archivar un registro que no pertenece al usuario.");
-        erroresTotales++;
-        continue;
-      }
-
-      try {
-        // 1. POST HistorialIngreso (Se envía el objeto original completo para no perder datos)
-        const resPost = await fetch(`${API_BASE_URL}${API_ENDPOINTS.historialIngresos}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(registroOriginal)
-        });
-
-        if (!resPost.ok) {
-          throw new Error(`Error al crear historial para ingreso ID ${id}`);
-        }
-
-        // 2. DELETE Ingreso Original (Solo se ejecuta si el POST fue exitoso)
-        const resDelete = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ingresos}/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (!resDelete.ok) {
-          throw new Error(`Error al eliminar el ingreso original ID ${id} tras guardarlo en historial`);
-        }
-
-        totalExitosos++;
-      } catch (error) {
-        console.error(error);
-        erroresTotales++;
-      }
+    if (!rolUsuario || rolUsuario < 2) {
+      toast.error("Acceso denegado: Tu plan actual no te permite realizar esta acción.");
+      return;
     }
+    const confirmacion = window.confirm('¿Estás seguro de que quieres archivar el mes?');
+    if (!confirmacion) return; 
+    try {
+      setModalArchivarAbierto(false);
 
-    // Procesamiento Secuencial Seguro para Gastos
-    for (const id of gastosSeleccionados) {
-      const registroOriginal = datosGastosCompletos.find(r => r.IdGasto === id || r.id === id);
-      
-      if (!registroOriginal) continue;
+      const response = await fetch(`${API_BASE_URL}/Cierre/FinalizarMes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem("Token")}`
+        },
+        body: JSON.stringify({ IdUsuario: idUsuarioActual })
+      });
 
-      if (registroOriginal.IdUsuario && registroOriginal.IdUsuario !== idUsuarioActual) {
-        console.error("Intento de archivar un registro que no pertenece al usuario.");
-        erroresTotales++;
-        continue;
+      if (response.ok) {
+        toast.success("¡Mes archivado correctamente!");
+        obtenerDatos(cotizaciones);
+      } else {
+        toast.error("Error al archivar el mes actual. Verifica el servidor.");
       }
-
-      try {
-        // 1. POST HistorialGasto
-        const resPost = await fetch(`${API_BASE_URL}${API_ENDPOINTS.historialGastos}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(registroOriginal)
-        });
-
-        if (!resPost.ok) {
-          throw new Error(`Error al crear historial para gasto ID ${id}`);
-        }
-
-        // 2. DELETE Gasto Original
-        const resDelete = await fetch(`${API_BASE_URL}${API_ENDPOINTS.gastos}/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (!resDelete.ok) {
-          throw new Error(`Error al eliminar el gasto original ID ${id} tras guardarlo en historial`);
-        }
-
-        totalExitosos++;
-      } catch (error) {
-        console.error(error);
-        erroresTotales++;
-      }
+    } catch (error) {
+      console.error("Error en la petición de archivo:", error);
+      toast.error("Error de red al intentar archivar el mes.");
     }
-
-    setArchivando(false);
-
-    // Feedback final
-    if (erroresTotales > 0) {
-      toast.warning(`Se completó con ${erroresTotales} error(es). Revisa la consola. Registros archivados: ${totalExitosos}`);
-    } else if (totalExitosos > 0) {
-      toast.success(`¡Archivado correctamente! (${totalExitosos} registros movidos)`);
-    }
-
-    // Limpieza de estado y actualización visual
-    setModalArchivarAbierto(false);
-    setIngresosSeleccionados([]);
-    setGastosSeleccionados([]);
-    setEstadoModalArchivar("seleccion");
-    obtenerDatos(cotizaciones); // Vuelve a fetchear los datos desde 0
   };
 
   const nombre = localStorage.getItem("Nombre") || "Usuario";
@@ -639,13 +511,14 @@ const GastoIngreso = () => {
             }}
             onClick={() => {
               if (tienePermisoArchivar) {
-                abrirModalArchivar();
+                setModalArchivarAbierto(true);
               } else {
                 toast.warning("Función Premium: Necesitas mejorar tu cuenta (Plan Gold o Platino) para poder archivar todos tu ingreso y gasto historico. 🚀");
+
               }
             }}
             className='botonesComparativa btn-secundario'
-            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar movimientos seleccionados"}
+            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar los datos financieros del mes actual"}
           >
             Archivar Historico
           </button>
@@ -1065,133 +938,26 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
-
-      {/* NUEVO MODAL DE ARCHIVADO SELECTIVO */}
-      {modalArchivarAbierto && (
-        <div className="modal-overlay" onClick={() => !archivando && setModalArchivarAbierto(false)}>
-          <div className="modal-contenido" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Archivar Histórico Selectivo</h3>
-              <button className="btn-cerrar" onClick={() => !archivando && setModalArchivarAbierto(false)} disabled={archivando}>&times;</button>
-            </div>
-
-            {estadoModalArchivar === "seleccion" && (
+      {
+        modalArchivarAbierto && (
+          <div className="modal-overlay" onClick={() => setModalArchivarAbierto(false)}>
+            <div className="modal-contenido" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Archivar Mes Actual</h3>
+                <button className="btn-cerrar" onClick={() => setModalArchivarAbierto(false)}>&times;</button>
+              </div>
               <div className="modal-body-general">
-                <div className="selector-tipo-archivo">
-                  <label>Tipo de movimiento:</label>
-                  <select 
-                    value={tipoArchivo} 
-                    onChange={(e) => setTipoArchivo(e.target.value)}
-                    className="select-custom-premium"
-                  >
-                    <option value="ingresos">Ingresos</option>
-                    <option value="gastos">Gastos</option>
-                  </select>
-                </div>
-
-                <div className="modal-lista-registros">
-                  {tipoArchivo === "ingresos" && (
-                    datosIngresosCompletos.length === 0 ? (
-                      <p className="registro-vacio">No tienes ingresos disponibles.</p>
-                    ) : (
-                      datosIngresosCompletos.map(item => {
-                        const itemId = item.IdIngreso || item.id;
-                        const isChecked = ingresosSeleccionados.includes(itemId);
-                        return (
-                          <div key={itemId} className={`registro-item ${isChecked ? 'seleccionado' : ''}`} onClick={() => toggleSeleccion("ingresos", itemId)}>
-                            <div className="registro-check">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked} 
-                                onChange={() => {}} // Manejado por el onClick del contenedor
-                              />
-                            </div>
-                            <div className="registro-info">
-                              <span className="registro-desc">{item.Descripcion || "Sin Descripción"} (ID: {itemId})</span>
-                              <span className="registro-monto">${Number(item.MontoIngreso || 0).toLocaleString("es-AR")}</span>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )
-                  )}
-
-                  {tipoArchivo === "gastos" && (
-                    datosGastosCompletos.length === 0 ? (
-                      <p className="registro-vacio">No tienes gastos disponibles.</p>
-                    ) : (
-                      datosGastosCompletos.map(item => {
-                        const itemId = item.IdGasto || item.id;
-                        const isChecked = gastosSeleccionados.includes(itemId);
-                        return (
-                          <div key={itemId} className={`registro-item ${isChecked ? 'seleccionado' : ''}`} onClick={() => toggleSeleccion("gastos", itemId)}>
-                            <div className="registro-check">
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked} 
-                                onChange={() => {}} // Manejado por el onClick del contenedor
-                              />
-                            </div>
-                            <div className="registro-info">
-                              <span className="registro-desc">{item.Descripcion || "Sin Descripción"} (ID: {itemId})</span>
-                              <span className="registro-monto">${Number(item.MontoGasto || 0).toLocaleString("es-AR")}</span>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )
-                  )}
-                </div>
-
-                <div className="registro-resumen-footer">
-                  <span>Seleccionados: {ingresosSeleccionados.length} ingresos / {gastosSeleccionados.length} gastos</span>
-                </div>
-
+                <h3 style={{ textAlign: 'center' }}>¿Estás seguro de que deseas archivar los datos de <strong>{getNombreMes(0)}</strong>?</h3>
+                <p style={{ color: '#8e8e93', marginTop: '10px', fontSize: '0.9rem', textAlign: 'center' }}>Esta acción no se puede deshacer.</p>
                 <div className="modal-acciones">
                   <button className="btn-Cancelar-General" onClick={() => setModalArchivarAbierto(false)}>Cancelar</button>
-                  <button className="btn-Confirmar-General" onClick={procederAConfirmacion}>Archivar seleccionados</button>
+                  <button className="btn-Confirmar-General" onClick={archivarMesActual}>Archivar</button>
                 </div>
               </div>
-            )}
-
-            {estadoModalArchivar === "confirmacion" && (
-              <div className="modal-body-general">
-                <h3 style={{ textAlign: 'center', color: '#c8b277' }}>Confirmación de Archivado</h3>
-                
-                <div className="confirmacion-caja">
-                  <p>Vas a archivar:</p>
-                  <ul>
-                    <li><strong>Ingresos:</strong> {ingresosSeleccionados.length}</li>
-                    <li><strong>Gastos:</strong> {gastosSeleccionados.length}</li>
-                  </ul>
-                  <hr style={{ borderColor: 'rgba(200, 178, 119, 0.2)' }} />
-                  <p><strong>Total:</strong> {ingresosSeleccionados.length + gastosSeleccionados.length} registros</p>
-                  
-                  <p className="warning-text">Esta acción copiará los registros seleccionados a la tabla histórica y los eliminará de los registros activos originales. ¿Deseas continuar?</p>
-                </div>
-
-                <div className="modal-acciones">
-                  <button 
-                    className="btn-Cancelar-General" 
-                    onClick={() => setEstadoModalArchivar("seleccion")}
-                    disabled={archivando}
-                  >
-                    Volver
-                  </button>
-                  <button 
-                    className="btn-Confirmar-General" 
-                    onClick={ejecutarArchivado}
-                    disabled={archivando}
-                    style={{ opacity: archivando ? 0.7 : 1 }}
-                  >
-                    {archivando ? "Procesando..." : "Confirmar archivado"}
-                  </button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   )
 };
