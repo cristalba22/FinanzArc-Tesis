@@ -19,27 +19,16 @@ const API_ENDPOINTS = {
   ingresos: "/Ingreso",
   usuarios: "/Usuarios",
   ahorros: "/MetaAhorro",
-  transacciones: "/Transacciones",
-  cierre: "/Cierre/FinalizarMes",
-  historialIngresos: "/HistorialIngreso",
-  historialGastos: "/HistorialGasto"
+  transacciones: "/Transacciones"
 };
+
 
 const GastoIngreso = () => {
   const [mostrarSaludo, setMostrarSaludo] = useState(true);
 
-  // Estados para gráficos (transformados)
   const [datosGastos, setDatosGastos] = useState([]);
   const [datosIngresos, setDatosIngresos] = useState([]);
   const [metasAhorro, setMetasAhorro] = useState([]);
-
-  // Estados para conservar los registros completos de la API
-  const [datosGastosCompletos, setDatosGastosCompletos] = useState([]);
-  const [datosIngresosCompletos, setDatosIngresosCompletos] = useState([]);
-
-  // Estados para el flujo del modal de archivado
-  const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
-  const [archivando, setArchivando] = useState(false);
 
   const [idUsuarioActual, setIdUsuarioActual] = useState(null);
 
@@ -75,7 +64,6 @@ const GastoIngreso = () => {
       return respaldo;
     }
   };
-
   const formatMontoParaInput = (val) => {
     if (val === "" || val === null || val === undefined) return "";
     const stringVal = val.toString();
@@ -85,9 +73,9 @@ const GastoIngreso = () => {
       ? parts[0] + "," + parts[1]
       : (stringVal.endsWith(".") ? parts[0] + "," : parts[0]);
   };
-
   const [modalAgregarAbierto, setModalAgregarAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [modalArchivarAbierto, setModalArchivarAbierto] = useState(false);
 
   const [metaForm, setMetaForm] = useState({
     IdMetaAhorro: null,
@@ -157,15 +145,13 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosGastosCompletos(data);
         const gastosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin descripción",
           valor: convertirAPesos(item.MontoGasto, item.IdDivisa, cotizacionesData),
           monedaOriginal: Number(item.IdDivisa) === 2 ? "USD" : Number(item.IdDivisa) === 3 ? "EUR" : "ARS"
         }));
         setDatosGastos(gastosProcesados);
-      })
-      .catch(err => console.error("Error al obtener gastos:", err));
+      });
   };
 
   const obtenerIngresos = (idusuario, cotizacionesData) => {
@@ -177,15 +163,13 @@ const GastoIngreso = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setDatosIngresosCompletos(data);
         const ingresosProcesados = data.map(item => ({
           name: item.Descripcion || "Sin Descripción",
           valor: convertirAPesos(item.MontoIngreso, item.IdDivisa, cotizacionesData),
           monedaOriginal: Number(item.IdDivisa) === 2 ? "USD" : Number(item.IdDivisa) === 3 ? "EUR" : "ARS"
         }));
         setDatosIngresos(ingresosProcesados);
-      })
-      .catch(err => console.error("Error al obtener ingresos:", err));
+      });
   };
 
   const obtenerAhorros = (idusuario, cotizacionesData) => {
@@ -204,8 +188,7 @@ const GastoIngreso = () => {
           objetivo: convertirAPesos(item.MontoObjetivo, item.IdDivisa, cotizacionesData)
         }));
         setMetasAhorro(metasProcesadas);
-      })
-      .catch(err => console.error("Error al obtener ahorros:", err));
+      });
   };
 
   const obtenerLimiteMetas = (idRol) => {
@@ -216,6 +199,16 @@ const GastoIngreso = () => {
       case 4: return Infinity;
       default: return 1;
     }
+  };
+
+  const getNombreMes = (offset = 0) => {
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const fecha = new Date();
+    fecha.setMonth(fecha.getMonth() + offset);
+    return meses[fecha.getMonth()];
   };
 
   const metasActivas = metasAhorro.filter(meta => meta.IdEstadoMetaAhorro !== 2);
@@ -339,7 +332,7 @@ const GastoIngreso = () => {
         toast.success("Meta eliminada correctamente");
 
         setModalEditarAbierto(false);
-        obtenerDatos(cotizaciones);
+        obtenerDatos();
       })
       .catch(error => {
         console.error(error);
@@ -444,40 +437,38 @@ const GastoIngreso = () => {
     setModalEditarAbierto(true);
   };
 
-  // FUNCIÓN DE ARCHIVADO USANDO EL CONTROLADOR DE CIERRE EXISTENTE EN LA API
-  const ejecutarArchivado = async () => {
+  const archivarMesActual = async () => {
     if (!idUsuarioActual) {
-      toast.error("No se pudo identificar al usuario actual.");
+      toast.warning("No se encontró un usuario válido para realizar la acción.");
       return;
     }
-
-    setArchivando(true);
-    const token = localStorage.getItem("Token");
-
+    if (!rolUsuario || rolUsuario < 2) {
+      toast.error("Acceso denegado: Tu plan actual no te permite realizar esta acción.");
+      return;
+    }
+    const confirmacion = window.confirm('¿Estás seguro de que quieres archivar el mes?');
+    if (!confirmacion) return; 
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.cierre}`, {
-        method: "POST",
+      setModalArchivarAbierto(false);
+
+      const response = await fetch(`${API_BASE_URL}/Cierre/FinalizarMes`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem("Token")}`
         },
         body: JSON.stringify({ IdUsuario: idUsuarioActual })
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.mensaje || "Error al procesar el cierre.");
+      if (response.ok) {
+        toast.success("¡Mes archivado correctamente!");
+        obtenerDatos(cotizaciones);
+      } else {
+        toast.error("Error al archivar el mes actual. Verifica el servidor.");
       }
-
-      toast.success(data.mensaje || "¡Datos archivados y tablas limpias correctamente!");
-      setModalArchivarAbierto(false);
-      obtenerDatos(cotizaciones);
     } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Error al realizar el archivado.");
-    } finally {
-      setArchivando(false);
+      console.error("Error en la petición de archivo:", error);
+      toast.error("Error de red al intentar archivar el mes.");
     }
   };
 
@@ -522,15 +513,17 @@ const GastoIngreso = () => {
               if (tienePermisoArchivar) {
                 setModalArchivarAbierto(true);
               } else {
-                toast.warning("Función Premium: Necesitas mejorar tu cuenta (Plan Gold o Platino) para poder archivar tu histórico. 🚀");
+                toast.warning("Función Premium: Necesitas mejorar tu cuenta (Plan Gold o Platino) para poder archivar todos tu ingreso y gasto historico. 🚀");
+
               }
             }}
             className='botonesComparativa btn-secundario'
-            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar movimientos"}
+            title={!tienePermisoArchivar ? "Función Premium: Requiere mejorar tu cuenta a un plan superior para archivar." : "Archivar los datos financieros del mes actual"}
           >
             Archivar Historico
           </button>
         </div>
+        
       </div>
 
       <div className="panel-graficos-general">
@@ -729,7 +722,6 @@ const GastoIngreso = () => {
         )}
 
       </div>
-
       {modalEditarAbierto && (
         <div className="capa-modal" onClick={() => setModalEditarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -849,7 +841,6 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
-
       {modalAgregarAbierto && (
         <div className="capa-modal" onClick={() => setModalAgregarAbierto(false)}>
           <div className="contenido-modal" onClick={(e) => e.stopPropagation()}>
@@ -947,45 +938,26 @@ const GastoIngreso = () => {
           </div>
         </div>
       )}
-
-      {/* MODAL DE CONFIRMACIÓN DE ARCHIVADO (CONECTADO AL ENDPOINT DE CIERRE DE LA API) */}
-      {modalArchivarAbierto && (
-        <div className="modal-overlay" onClick={() => !archivando && setModalArchivarAbierto(false)}>
-          <div className="modal-contenido" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Archivar Histórico / Cierre</h3>
-              <button className="btn-cerrar" onClick={() => !archivando && setModalArchivarAbierto(false)} disabled={archivando}>&times;</button>
-            </div>
-
-            <div className="modal-body-general">
-              <div className="confirmacion-caja">
-                <p>Estás a punto de procesar el archivo y cierre de tus registros activos actuales.</p>
-                <p className="warning-text" style={{ marginTop: '10px' }}>
-                  Esta acción moverá todos tus ingresos y gastos actuales al historial correspondiente y limpiará las tablas activas. ¿Deseas continuar?
-                </p>
+      {
+        modalArchivarAbierto && (
+          <div className="modal-overlay" onClick={() => setModalArchivarAbierto(false)}>
+            <div className="modal-contenido" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Archivar Mes Actual</h3>
+                <button className="btn-cerrar" onClick={() => setModalArchivarAbierto(false)}>&times;</button>
               </div>
-
-              <div className="modal-acciones" style={{ marginTop: '20px' }}>
-                <button 
-                  className="btn-Cancelar-General" 
-                  onClick={() => setModalArchivarAbierto(false)}
-                  disabled={archivando}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  className="btn-Confirmar-General" 
-                  onClick={ejecutarArchivado}
-                  disabled={archivando}
-                  style={{ opacity: archivando ? 0.7 : 1 }}
-                >
-                  {archivando ? "Procesando..." : "Confirmar archivado"}
-                </button>
+              <div className="modal-body-general">
+                <h3 style={{ textAlign: 'center' }}>¿Estás seguro de que deseas archivar los datos de <strong>{getNombreMes(0)}</strong>?</h3>
+                <p style={{ color: '#8e8e93', marginTop: '10px', fontSize: '0.9rem', textAlign: 'center' }}>Esta acción no se puede deshacer.</p>
+                <div className="modal-acciones">
+                  <button className="btn-Cancelar-General" onClick={() => setModalArchivarAbierto(false)}>Cancelar</button>
+                  <button className="btn-Confirmar-General" onClick={archivarMesActual}>Archivar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   )
 };
